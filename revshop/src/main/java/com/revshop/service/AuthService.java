@@ -6,6 +6,7 @@ import com.revshop.repository.RoleRepository;
 import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -17,7 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     public String register(User user) {
 
