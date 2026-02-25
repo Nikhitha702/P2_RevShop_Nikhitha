@@ -1,14 +1,18 @@
 package com.revshop.service;
 
+import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.Role;
+import com.revshop.entity.Seller;
 import com.revshop.entity.User;
 import com.revshop.repository.RoleRepository;
+import com.revshop.repository.SellerRepository;
 import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 @Service
@@ -17,48 +21,73 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
+    private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public String register(User user) {
+    // 🛍 Buyer Registration
+    public String registerBuyer(BuyerRegisterRequest request) {
 
-        // ✅ Check if email already exists
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return "Email already exists!";
         }
 
-        // ✅ Get or create ROLE_BUYER
         Role role = roleRepository.findByName("ROLE_BUYER")
-                .orElseGet(() -> roleRepository.save(
-                        Role.builder()
+                .orElseGet(() ->
+                        roleRepository.save(Role.builder()
                                 .name("ROLE_BUYER")
-                                .build()
-                ));
+                                .build())
+                );
 
-        // ✅ Encrypt password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .enabled(true)
+                .roles(Collections.singleton(role))
+                .build();
 
-        // ✅ Set role
-        user.setRoles(Collections.singleton(role));
-
-        // ✅ IMPORTANT: Explicitly set enabled
-        user.setEnabled(true);
-
-        // ✅ Save user
         userRepository.save(user);
 
-        return "User Registered Successfully";
+        return "Buyer Registered Successfully";
     }
 
-    public String login(String email, String password) {
+    public String registerSeller(SellerRegisterRequest request) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return "Invalid Password";
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return "Email already exists!";
         }
 
-        return "Login Successful";
+        Role role = roleRepository.findByName("ROLE_SELLER")
+                .orElseGet(() ->
+                        roleRepository.save(Role.builder()
+                                .name("ROLE_SELLER")
+                                .build())
+                );
+
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .enabled(true)
+                .roles(Collections.singleton(role))
+                .build();
+
+        userRepository.save(user);
+
+        Seller seller = Seller.builder()
+                .user(user)
+                .businessName(request.getBusinessName())
+                .gstNumber(request.getGstNumber())
+                .address(request.getAddress())
+                .phone(request.getPhone())
+                .category(request.getCategory())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        sellerRepository.save(seller);
+
+        return "Seller Registered Successfully";
     }
 }

@@ -1,6 +1,7 @@
 package com.revshop.controller;
 
-import com.revshop.entity.User;
+import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -16,13 +17,19 @@ public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager authenticationManager;
 
-    // ✅ REGISTER
-    @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        return authService.register(user);
+    // 🛍 Buyer Registration
+    @PostMapping("/register/buyer")
+    public String registerBuyer(@RequestBody BuyerRegisterRequest request) {
+        return authService.registerBuyer(request);
     }
 
-    // ✅ LOGIN (Session-Based Authentication)
+    // 🏬 Seller Registration
+    @PostMapping("/register/seller")
+    public String registerSeller(@RequestBody SellerRegisterRequest request) {
+        return authService.registerSeller(request);
+    }
+
+    // 🔐 Login
     @PostMapping("/login")
     public String login(@RequestParam String email,
                         @RequestParam String password) {
@@ -37,7 +44,7 @@ public class AuthController {
         return "Login Successful";
     }
 
-    // ✅ LOGOUT
+    // 🚪 Logout
     @PostMapping("/logout")
     public String logout() {
         SecurityContextHolder.clearContext();
