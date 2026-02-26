@@ -15,31 +15,28 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // ==========================
+    // ===============================
     // BUYER CHECKOUT
-    // ==========================
+    // ===============================
     @PostMapping("/checkout")
     public String checkout() {
         return orderService.checkout();
     }
 
-    // ==========================
+    // ===============================
     // BUYER VIEW ORDERS
-    // ==========================
+    // ===============================
     @GetMapping("/my-orders")
     public List<Order> getMyOrders() {
         return orderService.getMyOrders();
     }
 
-    // ==========================
+    // ===============================
     // SELLER UPDATE STATUS
-    // ==========================
+    // ===============================
     @PutMapping("/update-status")
     public String updateStatus(@RequestParam Long orderId,
-                               @RequestParam String status) {
-
-        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-
-        return orderService.updateOrderStatus(orderId, orderStatus);
+                               @RequestParam OrderStatus status) {
+        return orderService.updateOrderStatus(orderId, status);
     }
 }

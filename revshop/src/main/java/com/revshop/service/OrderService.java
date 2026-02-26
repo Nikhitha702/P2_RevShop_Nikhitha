@@ -1,14 +1,14 @@
 package com.revshop.service;
 
 import com.revshop.entity.*;
-import com.revshop.repository.*;
+import com.revshop.repository.OrderRepository;
+import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,14 +16,11 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
 
-    // ==========================
-    // CHECKOUT
-    // ==========================
+    // ===============================
+    // BUYER CHECKOUT
+    // ===============================
     public String checkout() {
 
         String email = SecurityContextHolder.getContext()
@@ -33,16 +30,6 @@ public class OrderService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        if (cart.getItems().isEmpty()) {
-            return "Cart is empty";
-        }
-
-        BigDecimal total = BigDecimal.ZERO;
-        List<OrderItem> orderItems = new ArrayList<>();
-
         Order order = Order.builder()
                 .user(user)
                 .status(OrderStatus.PLACED)
@@ -50,40 +37,14 @@ public class OrderService {
                 .totalAmount(BigDecimal.ZERO)
                 .build();
 
-        order = orderRepository.save(order);
-
-        for (CartItem cartItem : cart.getItems()) {
-
-            BigDecimal price = cartItem.getProduct().getDiscountedPrice();
-            int quantity = cartItem.getQuantity();
-
-            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
-            total = total.add(subtotal);
-
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .product(cartItem.getProduct())
-                    .quantity(quantity)
-                    .price(price)
-                    .build();
-
-            orderItems.add(orderItem);
-        }
-
-        orderItemRepository.saveAll(orderItems);
-
-        order.setItems(orderItems);
-        order.setTotalAmount(total);
         orderRepository.save(order);
 
-        cartItemRepository.deleteAll(cart.getItems());
-
-        return "Order Placed Successfully";
+        return "Order placed successfully";
     }
 
-    // ==========================
-    // BUYER VIEW ORDERS
-    // ==========================
+    // ===============================
+    // BUYER VIEW MY ORDERS
+    // ===============================
     public List<Order> getMyOrders() {
 
         String email = SecurityContextHolder.getContext()
@@ -96,9 +57,9 @@ public class OrderService {
         return orderRepository.findByUser(user);
     }
 
-    // ==========================
+    // ===============================
     // SELLER UPDATE STATUS
-    // ==========================
+    // ===============================
     public String updateOrderStatus(Long orderId, OrderStatus status) {
 
         Order order = orderRepository.findById(orderId)
