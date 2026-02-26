@@ -20,20 +20,29 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register/**").permitAll()
 
-                        // 🔹 Public GET APIs
+                        // 🔓 Public Auth APIs
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 🔓 Public Product Viewing
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
 
-                        // 🔹 Seller Only POST
+                        // 🔐 Only SELLER can add/update/delete products
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
 
+                        // 🔐 Only BUYER can access Cart
+                        .requestMatchers("/api/cart/**").hasRole("BUYER")
+
+                        // 🔐 Test endpoints (optional)
                         .requestMatchers("/api/test/buyer").hasRole("BUYER")
                         .requestMatchers("/api/test/seller").hasRole("SELLER")
 
                         .anyRequest().authenticated()
                 )
 
+                // Enable Basic Authentication for Postman
                 .httpBasic(httpBasic -> {});
 
         return http.build();

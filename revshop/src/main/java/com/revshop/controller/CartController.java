@@ -1,0 +1,56 @@
+package com.revshop.controller;
+
+import com.revshop.entity.Cart;
+import com.revshop.service.CartService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+
+@RestController
+@RequestMapping("/api/cart")
+@RequiredArgsConstructor
+public class CartController {
+
+    private final CartService cartService;
+
+    // Add product to cart
+    @PostMapping("/add")
+    public String addToCart(
+            @RequestParam Long productId,
+            @RequestParam Integer quantity) {
+        return cartService.addToCart(productId, quantity);
+    }
+
+    // View cart
+    @GetMapping
+    public Cart viewCart() {
+        return cartService.viewCart();
+    }
+
+    // Remove item
+    @DeleteMapping("/remove")
+    public String removeItem(@RequestParam Long cartItemId) {
+        return cartService.removeFromCart(cartItemId);
+    }
+
+    // Update quantity
+    @PutMapping("/update")
+    public String updateQuantity(
+            @RequestParam Long cartItemId,
+            @RequestParam Integer quantity) {
+        return cartService.updateQuantity(cartItemId, quantity);
+    }
+
+    // Get total
+    @GetMapping("/total")
+    public BigDecimal getTotal() {
+        return cartService.calculateTotal();
+    }
+
+    // Clear cart
+    @DeleteMapping("/clear")
+    public String clearCart() {
+        return cartService.clearCart();
+    }
+}
