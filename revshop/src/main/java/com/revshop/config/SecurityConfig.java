@@ -17,42 +17,61 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                // Disable CSRF for Postman testing
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // 🔓 Public Auth APIs
+                        // =============================
+                        // AUTH APIs (Public)
+                        // =============================
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // 🔓 Public Product Viewing
+                        // =============================
+                        // PRODUCT APIs
+                        // =============================
+
+                        // Anyone can view products
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
 
-                        // 🔐 Only SELLER can add/update/delete products
+                        // Only SELLER can add/update/delete
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("SELLER")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
 
-                        // 🔐 Only BUYER can access Cart
+                        // =============================
+                        // CART APIs (BUYER only)
+                        // =============================
                         .requestMatchers("/api/cart/**").hasRole("BUYER")
 
-                        // 🔐 Test endpoints (optional)
-                        .requestMatchers("/api/test/buyer").hasRole("BUYER")
-                        .requestMatchers("/api/test/seller").hasRole("SELLER")
+                        // =============================
+                        // ORDER APIs
+                        // =============================
 
+                        // Buyer Checkout & View
+                        .requestMatchers("/api/orders/checkout").hasRole("BUYER")
+                        .requestMatchers("/api/orders/my-orders").hasRole("BUYER")
+
+                        // Seller Update Status
+                        .requestMatchers("/api/orders/update-status").hasRole("SELLER")
+
+                        // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )
 
-                // Enable Basic Authentication for Postman
+                // Enable Basic Authentication (for Postman)
                 .httpBasic(httpBasic -> {});
 
         return http.build();
     }
 
+    // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
