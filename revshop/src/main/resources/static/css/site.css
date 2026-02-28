@@ -109,3 +109,15 @@ form .cta {
     border: none;
     cursor: pointer;
 }
+
+.card .cta {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+pre.note {
+    white-space: pre-wrap;
+    word-break: break-word;
+}

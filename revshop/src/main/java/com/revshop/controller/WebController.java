@@ -41,4 +41,14 @@ public class WebController {
         model.addAttribute("notifications", notificationService.getMyNotifications());
         return "dashboard";
     }
+
+    @GetMapping("/dashboard/buyer")
+    public String buyerDashboard() {
+        return "buyer-dashboard";
+    }
+
+    @GetMapping("/dashboard/seller")
+    public String sellerDashboard() {
+        return "seller-dashboard";
+    }
 }

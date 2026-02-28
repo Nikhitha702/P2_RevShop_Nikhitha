@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - RevShop</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="hero compact">
+    <h1>Seller Dashboard</h1>
+    <p>Quick actions for inventory, orders, and notifications</p>
+    <a href="/dashboard" class="cta">Back</a>
+</header>
+
+<section class="grid">
+    <article class="card">
+        <h2>Inventory</h2>
+        <button class="cta" onclick="loadInventory()">View Inventory</button>
+        <button class="cta" onclick="loadLowStock()">Low Stock Alerts</button>
+    </article>
+
+    <article class="card">
+        <h2>Seller Orders</h2>
+        <button class="cta" onclick="loadSellerOrders()">View Seller Orders</button>
+        <label>Order Id</label><input id="orderId" type="number">
+        <label>Status (SHIPPED/DELIVERED)</label><input id="status" placeholder="SHIPPED">
+        <button class="cta" onclick="updateOrderStatus()">Update Status</button>
+    </article>
+
+    <article class="card">
+        <h2>Notifications</h2>
+        <button class="cta" onclick="loadNotifications()">Load Notifications</button>
+    </article>
+</section>
+
+<section class="notifications">
+    <pre class="note" id="output">Run an action to see response...</pre>
+</section>
+
+<script>
+    async function callApi(url, options) {
+        const res = await fetch(url, options || {});
+        const text = await res.text();
+        try {
+            document.getElementById('output').textContent = JSON.stringify(JSON.parse(text), null, 2);
+        } catch (_) {
+            document.getElementById('output').textContent = text;
+        }
+    }
+
+    async function loadInventory() {
+        await callApi('/api/products/inventory');
+    }
+
+    async function loadLowStock() {
+        await callApi('/api/products/inventory/low-stock');
+    }
+
+    async function loadSellerOrders() {
+        await callApi('/api/orders/seller-orders');
+    }
+
+    async function updateOrderStatus() {
+        const id = document.getElementById('orderId').value;
+        const status = document.getElementById('status').value;
+        await callApi(`/api/orders/update-status?orderId=${id}&status=${status}`, {method: 'PUT'});
+    }
+
+    async function loadNotifications() {
+        await callApi('/api/notifications');
+    }
+</script>
+</body>
+</html>
