@@ -3,42 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Registration - RevShop</title>
+    <title>Seller Signup - RevShop</title>
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
-<header class="hero compact">
-    <h1>Seller Registration</h1>
-    <p>Create your seller account</p>
+<header class="topbar">
+    <div class="topbar-row">
+        <a class="brand" href="/">RevShop</a>
+        <div class="nav-links">
+            <a class="btn btn-secondary" href="/login">Login</a>
+        </div>
+    </div>
 </header>
 
-<section class="notifications">
-    <form class="note" id="sellerForm">
-        <label>First Name</label><input name="firstName" required>
-        <label>Last Name</label><input name="lastName" required>
-        <label>Email</label><input type="email" name="email" required>
-        <label>Password</label><input type="password" name="password" required>
-        <label>Phone</label><input name="phone" required>
-        <label>Address</label><input name="address" required>
-        <label>Business Name</label><input name="businessName" required>
-        <label>GST Number</label><input name="gstNumber" required>
-        <label>Category</label><input name="category" required>
-        <button class="cta" type="submit">Register Seller</button>
-        <p id="msg"></p>
-    </form>
-</section>
+<main class="page">
+    <section class="form-wrap">
+        <h1>Seller Registration</h1>
+        <form id="sellerForm" onsubmit="register(event, 'sellerForm', '/api/auth/register/seller', 'msg')">
+            <label>First Name</label><input name="firstName" required>
+            <label>Last Name</label><input name="lastName" required>
+            <label>Email</label><input type="email" name="email" required>
+            <label>Password</label><input type="password" name="password" required>
+            <label>Phone</label><input name="phone" required>
+            <label>Address</label><textarea name="address" rows="2" required></textarea>
+            <label>Business Name</label><input name="businessName" required>
+            <label>GST Number</label><input name="gstNumber" required>
+            <label>Business Category</label><input name="category" required>
+            <button class="btn btn-primary" style="margin-top:1rem; width:100%;" type="submit">Create Seller Account</button>
+            <p id="msg" class="small"></p>
+        </form>
+    </section>
+</main>
 
-<script>
-    document.getElementById('sellerForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const payload = Object.fromEntries(new FormData(e.target).entries());
-        const res = await fetch('/api/auth/register/seller', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
-        });
-        document.getElementById('msg').textContent = await res.text();
-    });
-</script>
+<script th:src="@{/js/auth.js}"></script>
 </body>
 </html>

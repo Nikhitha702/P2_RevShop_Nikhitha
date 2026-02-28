@@ -3,25 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RevShop Dashboard</title>
+    <title>Dashboard - RevShop</title>
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
-<header class="hero compact">
-    <h1>Dashboard</h1>
-    <p>Recent in-app notifications</p>
-    <a href="/" class="cta">Back to Products</a>
-    <div class="hero-links">
-        <a href="/dashboard/buyer">Buyer Panel</a>
-        <a href="/dashboard/seller">Seller Panel</a>
+<header class="topbar">
+    <div class="topbar-row">
+        <a class="brand" href="/">RevShop</a>
+        <div class="nav-links">
+            <a class="btn btn-secondary" href="/dashboard/buyer">Buyer Workbench</a>
+            <a class="btn btn-secondary" href="/dashboard/seller">Seller Workbench</a>
+            <form action="/logout" method="post" style="margin:0;">
+                <button class="btn btn-danger" type="submit">Logout</button>
+            </form>
+        </div>
     </div>
 </header>
 
-<section class="notifications" th:if="${notifications != null}">
-    <div class="note" th:each="note : ${notifications}">
-        <p th:text="${note.message}">Notification message</p>
-        <small th:text="${note.createdAt}">Time</small>
+<main class="page">
+    <section class="hero" style="margin-top:1rem;">
+        <div>
+            <h1>Control Center</h1>
+            <p>Switch between buyer and seller workbenches and monitor notifications.</p>
+        </div>
+        <div class="hero-card">
+            <h3>Quick Navigation</h3>
+            <div class="row">
+                <a class="btn btn-primary" href="/dashboard/buyer">Buyer</a>
+                <a class="btn btn-primary" href="/dashboard/seller">Seller</a>
+                <a class="btn btn-secondary" href="/">Storefront</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-title">
+        <h2>Recent Notifications</h2>
     </div>
-</section>
+
+    <section class="panel-grid" th:if="${notifications != null}">
+        <article class="panel" th:each="note : ${notifications}">
+            <p th:text="${note.message}">Notification message</p>
+            <p class="small" th:text="${note.createdAt}">Time</p>
+        </article>
+    </section>
+</main>
 </body>
 </html>
