@@ -11,25 +11,32 @@ RevShop is a full-stack monolithic e-commerce application built with Spring Boot
 - Reviews and ratings (only for delivered purchased products)
 - Favorites (buyer wishlist)
 - In-app notifications for buyers and sellers
-- Basic Thymeleaf UI pages (`/`, `/dashboard`)
+- Thymeleaf UI pages (`/`, `/login`, `/register/*`, `/dashboard`, `/dashboard/buyer`, `/dashboard/seller`)
 
 ## Tech Stack
 - Java 21
-- Spring Boot
+- Spring Boot 4
 - Spring Data JPA
 - Spring Security
 - Thymeleaf (HTML/CSS/JS)
-- Oracle SQL
+- Oracle SQL (primary)
+- H2 (test profile)
 - Maven
 - Git
 
 ## Run Locally
 1. Configure Oracle DB in `src/main/resources/application.properties`.
-2. From project root:
+2. From `revshop/`:
    ```bash
    ./mvnw spring-boot:run
    ```
 3. Open `http://localhost:8080`.
+
+## Test
+- Tests run with isolated H2 profile:
+  ```bash
+  ./mvnw -q test
+  ```
 
 ## API Highlights
 - Auth: `/api/auth/**`
@@ -45,8 +52,16 @@ RevShop is a full-stack monolithic e-commerce application built with Spring Boot
 - ERD: `docs/ERD.md`
 - Architecture: `docs/ARCHITECTURE.md`
 - Testing artifacts: `docs/TESTING.md`
+- API endpoints: `docs/API_ENDPOINTS.md`
+- Postman collection: `docs/postman/RevShop.postman_collection.json`
+
+## CI
+- GitHub Actions workflow: `.github/workflows/ci.yml` (runs Maven tests on pushes and PRs)
 
 ## Branching Workflow Used
 - `feature/integration-complete` -> merged into `develop`
 - `feature/favorites-ui-docs` -> merged into `develop`
-- Further enhancements should follow the same branch-per-module flow.
+- `feature/final-polish` -> merged into `develop`
+- `feature/api-tests-polish` -> merged into `develop`
+- `feature/controller-ui-flow` -> merged into `develop`
+- `feature/final-completion` -> merged into `develop`
