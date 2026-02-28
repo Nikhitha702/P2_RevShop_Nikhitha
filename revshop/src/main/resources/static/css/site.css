@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+    --bg: linear-gradient(120deg, #f7efe5, #e7f4f1);
+    --ink: #1e1e1e;
+    --accent: #0b6e4f;
+    --panel: #ffffff;
+    --muted: #5f6c72;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.hero {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.hero.compact {
+    padding-bottom: 1rem;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.cta {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.7rem 1.2rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    text-decoration: none;
+}
+
+.grid {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card,
+.note {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.desc {
+    color: var(--muted);
+    min-height: 2rem;
+}
+
+.price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.notifications {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1rem;
+    max-width: 760px;
+    margin: 0 auto;
+}
