@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevShop Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="hero compact">
+    <h1>Dashboard</h1>
+    <p>Recent in-app notifications</p>
+    <a href="/" class="cta">Back to Products</a>
+</header>
+
+<section class="notifications" th:if="${notifications != null}">
+    <div class="note" th:each="note : ${notifications}">
+        <p th:text="${note.message}">Notification message</p>
+        <small th:text="${note.createdAt}">Time</small>
+    </div>
+</section>
+</body>
+</html>

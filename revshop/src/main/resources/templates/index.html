@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevShop Marketplace</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="hero">
+    <h1>RevShop</h1>
+    <p>Buy and sell with a unified commerce workflow.</p>
+    <a href="/dashboard" class="cta">Open Dashboard</a>
+</header>
+
+<main class="grid" th:if="${products != null}">
+    <article class="card" th:each="product : ${products}">
+        <h2 th:text="${product.name}">Product</h2>
+        <p class="desc" th:text="${product.description}">Description</p>
+        <p>Category: <span th:text="${product.category.name}">Category</span></p>
+        <p>Stock: <span th:text="${product.quantity}">0</span></p>
+        <p class="price" th:text="${product.discountedPrice}">0</p>
+    </article>
+</main>
+</body>
+</html>
