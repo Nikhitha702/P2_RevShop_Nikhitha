@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.CheckoutRequest;
 import com.revshop.entity.Order;
 import com.revshop.entity.OrderStatus;
@@ -19,7 +20,7 @@ public class OrderController {
 
     @PostMapping("/checkout")
     @PreAuthorize("hasRole('BUYER')")
-    public String checkout(@RequestBody(required = false) CheckoutRequest request) {
+    public ApiResponse checkout(@RequestBody(required = false) CheckoutRequest request) {
         return orderService.checkout(request);
     }
 
@@ -37,7 +38,7 @@ public class OrderController {
 
     @PutMapping("/update-status")
     @PreAuthorize("hasRole('SELLER')")
-    public String updateStatus(@RequestParam Long orderId, @RequestParam OrderStatus status) {
+    public ApiResponse updateStatus(@RequestParam Long orderId, @RequestParam OrderStatus status) {
         return orderService.updateOrderStatus(orderId, status);
     }
 }

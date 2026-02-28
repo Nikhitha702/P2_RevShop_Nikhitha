@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Order;
 import com.revshop.entity.OrderStatus;
 import com.revshop.entity.PaymentMethod;
@@ -61,9 +62,9 @@ class PaymentServiceTest {
         when(orderRepository.findById(11L)).thenReturn(Optional.of(order));
         when(paymentRepository.findByOrderId(11L)).thenReturn(Optional.empty());
 
-        String response = paymentService.makePayment(11L, PaymentMethod.CASH_ON_DELIVERY);
+        ApiResponse response = paymentService.makePayment(11L, PaymentMethod.CASH_ON_DELIVERY);
 
-        assertEquals("Payment Successful", response);
+        assertEquals("Payment Successful", response.getMessage());
         assertEquals(OrderStatus.SHIPPED, order.getStatus());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).save(order);

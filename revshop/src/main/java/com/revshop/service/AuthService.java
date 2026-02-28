@@ -1,6 +1,7 @@
 package com.revshop.service;
 
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.Role;
 import com.revshop.entity.Seller;
@@ -25,10 +26,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     // 🛍 Buyer Registration
-    public String registerBuyer(BuyerRegisterRequest request) {
+    public ApiResponse registerBuyer(BuyerRegisterRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return "Email already exists!";
+            return new ApiResponse(false, "Email already exists!");
         }
 
         Role role = roleRepository.findByName("ROLE_BUYER")
@@ -52,13 +53,13 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return "Buyer Registered Successfully";
+        return new ApiResponse(true, "Buyer Registered Successfully");
     }
 
-    public String registerSeller(SellerRegisterRequest request) {
+    public ApiResponse registerSeller(SellerRegisterRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return "Email already exists!";
+            return new ApiResponse(false, "Email already exists!");
         }
 
         Role role = roleRepository.findByName("ROLE_SELLER")
@@ -94,6 +95,6 @@ public class AuthService {
 
         sellerRepository.save(seller);
 
-        return "Seller Registered Successfully";
+        return new ApiResponse(true, "Seller Registered Successfully");
     }
 }

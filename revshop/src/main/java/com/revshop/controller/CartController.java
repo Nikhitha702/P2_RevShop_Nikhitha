@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Cart;
 import com.revshop.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class CartController {
 
     // Add product to cart
     @PostMapping("/add")
-    public String addToCart(
+    public ApiResponse addToCart(
             @RequestParam Long productId,
             @RequestParam Integer quantity) {
         return cartService.addToCart(productId, quantity);
@@ -32,13 +33,13 @@ public class CartController {
 
     // Remove item
     @DeleteMapping("/remove")
-    public String removeItem(@RequestParam Long cartItemId) {
+    public ApiResponse removeItem(@RequestParam Long cartItemId) {
         return cartService.removeFromCart(cartItemId);
     }
 
     // Update quantity
     @PutMapping("/update")
-    public String updateQuantity(
+    public ApiResponse updateQuantity(
             @RequestParam Long cartItemId,
             @RequestParam Integer quantity) {
         return cartService.updateQuantity(cartItemId, quantity);
@@ -52,7 +53,7 @@ public class CartController {
 
     // Clear cart
     @DeleteMapping("/clear")
-    public String clearCart() {
+    public ApiResponse clearCart() {
         return cartService.clearCart();
     }
 }

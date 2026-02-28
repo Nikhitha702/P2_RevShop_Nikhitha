@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.CheckoutRequest;
 import com.revshop.entity.Cart;
 import com.revshop.entity.CartItem;
@@ -39,7 +40,7 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public String checkout(CheckoutRequest request) {
+    public ApiResponse checkout(CheckoutRequest request) {
         User user = currentUserService.getCurrentUser();
         Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart is empty"));
 
@@ -93,7 +94,7 @@ public class OrderService {
         cartItemRepository.deleteAll(cart.getItems());
 
         notificationService.createNotification(user, "Order placed successfully. Order ID: " + savedOrder.getId());
-        return "Order placed successfully";
+        return new ApiResponse(true, "Order placed successfully");
     }
 
     public List<Order> getMyOrders() {
@@ -108,7 +109,7 @@ public class OrderService {
         return orderRepository.findOrdersForSeller(seller.getId());
     }
 
-    public String updateOrderStatus(Long orderId, OrderStatus status) {
+    public ApiResponse updateOrderStatus(Long orderId, OrderStatus status) {
         User user = currentUserService.getCurrentUser();
         Seller seller = sellerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
@@ -125,7 +126,7 @@ public class OrderService {
         order.setStatus(status);
         orderRepository.save(order);
         notificationService.createNotification(order.getUser(), "Your order " + order.getId() + " is now " + status);
-        return "Order status updated successfully";
+        return new ApiResponse(true, "Order status updated successfully");
     }
 
     private String resolveAddress(String providedAddress, String fallbackAddress) {

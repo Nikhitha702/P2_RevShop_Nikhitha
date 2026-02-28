@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.ProductRequest;
 import com.revshop.dto.ProductUpdateRequest;
 import com.revshop.entity.Category;
@@ -28,7 +29,7 @@ public class ProductService {
     private final CurrentUserService currentUserService;
     private final NotificationService notificationService;
 
-    public String addProduct(ProductRequest request) {
+    public ApiResponse addProduct(ProductRequest request) {
         User user = currentUserService.getCurrentUser();
         Seller seller = sellerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
@@ -52,7 +53,7 @@ public class ProductService {
                 .build();
 
         productRepository.save(product);
-        return "Product Added Successfully";
+        return new ApiResponse(true, "Product Added Successfully");
     }
 
     public Page<Product> getAllProducts(Pageable pageable) {
@@ -72,7 +73,7 @@ public class ProductService {
         return productRepository.findByCategoryNameIgnoreCase(categoryName, pageable);
     }
 
-    public String updateProduct(Long productId, ProductUpdateRequest request) {
+    public ApiResponse updateProduct(Long productId, ProductUpdateRequest request) {
         User user = currentUserService.getCurrentUser();
         Seller seller = sellerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
@@ -95,16 +96,16 @@ public class ProductService {
         validateProductPricing(product.getPrice(), product.getDiscountedPrice());
         productRepository.save(product);
         notifySellerOnLowStock(product);
-        return "Product updated successfully";
+        return new ApiResponse(true, "Product updated successfully");
     }
 
-    public String deleteProduct(Long productId) {
+    public ApiResponse deleteProduct(Long productId) {
         User user = currentUserService.getCurrentUser();
         Seller seller = sellerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
         Product product = getSellerProduct(seller, productId);
         productRepository.delete(product);
-        return "Product deleted successfully";
+        return new ApiResponse(true, "Product deleted successfully");
     }
 
     public List<Product> getSellerInventory() {

@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.OrderStatus;
 import com.revshop.entity.Product;
 import com.revshop.entity.User;
@@ -45,9 +46,9 @@ class ReviewServiceTest {
         when(productRepository.findById(9L)).thenReturn(Optional.of(product));
         when(orderRepository.existsByUserIdAndStatusAndItemsProductId(3L, OrderStatus.DELIVERED, 9L)).thenReturn(false);
 
-        String response = reviewService.addReview(9L, 5, "Great");
+        ApiResponse response = reviewService.addReview(9L, 5, "Great");
 
-        assertEquals("You can review only delivered purchased products", response);
+        assertEquals("You can review only delivered purchased products", response.getMessage());
         verify(reviewRepository, never()).save(any());
     }
 

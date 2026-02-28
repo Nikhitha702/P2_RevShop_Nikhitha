@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.PaymentMethod;
 import com.revshop.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/pay")
-    public String pay(
+    public ApiResponse pay(
             @RequestParam Long orderId,
             @RequestParam PaymentMethod method
     ) {

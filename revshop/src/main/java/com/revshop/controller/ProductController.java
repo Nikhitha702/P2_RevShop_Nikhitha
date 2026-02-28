@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.ProductRequest;
 import com.revshop.dto.ProductUpdateRequest;
 import com.revshop.entity.Product;
@@ -21,19 +22,19 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('SELLER')")
-    public String addProduct(@RequestBody ProductRequest request) {
+    public ApiResponse addProduct(@RequestBody ProductRequest request) {
         return productService.addProduct(request);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SELLER')")
-    public String updateProduct(@PathVariable Long id, @RequestBody ProductUpdateRequest request) {
+    public ApiResponse updateProduct(@PathVariable Long id, @RequestBody ProductUpdateRequest request) {
         return productService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER')")
-    public String deleteProduct(@PathVariable Long id) {
+    public ApiResponse deleteProduct(@PathVariable Long id) {
         return productService.deleteProduct(id);
     }
 
