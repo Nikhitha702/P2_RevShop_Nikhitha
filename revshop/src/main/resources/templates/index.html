@@ -3,29 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RevShop Marketplace</title>
+    <title>RevShop - Online Shopping</title>
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
-<header class="hero">
-    <h1>RevShop</h1>
-    <p>Buy and sell with a unified commerce workflow.</p>
-    <a href="/dashboard" class="cta">Open Dashboard</a>
-    <div class="hero-links">
-        <a href="/login">Login</a>
-        <a href="/register/buyer">Buyer Register</a>
-        <a href="/register/seller">Seller Register</a>
+<header class="topbar">
+    <div class="topbar-row">
+        <a class="brand" href="/">RevShop</a>
+        <div class="search">
+            <input id="searchKeyword" placeholder="Search products, categories...">
+            <button class="btn btn-primary" onclick="searchProducts()">Search</button>
+            <button class="btn btn-secondary" onclick="loadProducts()">Reset</button>
+        </div>
+        <div class="nav-links">
+            <a class="btn btn-secondary" href="/login">Login</a>
+            <a class="btn btn-secondary" href="/register/buyer">Buyer Signup</a>
+            <a class="btn btn-secondary" href="/register/seller">Seller Signup</a>
+            <a class="btn btn-primary" href="/dashboard">Dashboard</a>
+        </div>
     </div>
 </header>
 
-<main class="grid" th:if="${products != null}">
-    <article class="card" th:each="product : ${products}">
-        <h2 th:text="${product.name}">Product</h2>
-        <p class="desc" th:text="${product.description}">Description</p>
-        <p>Category: <span th:text="${product.category.name}">Category</span></p>
-        <p>Stock: <span th:text="${product.quantity}">0</span></p>
-        <p class="price" th:text="${product.discountedPrice}">0</p>
-    </article>
+<main class="page">
+    <section class="hero">
+        <div>
+            <h1>Everything You Need, Delivered Faster.</h1>
+            <p>Discover top deals, curated categories, and a complete buyer-seller ecosystem.</p>
+            <div class="filters">
+                <button class="pill" onclick="browseCategory('Electronics')">Electronics</button>
+                <button class="pill" onclick="browseCategory('Fashion')">Fashion</button>
+                <button class="pill" onclick="browseCategory('Home')">Home</button>
+                <button class="pill" onclick="browseCategory('Beauty')">Beauty</button>
+                <button class="pill" onclick="browseCategory('Sports')">Sports</button>
+            </div>
+        </div>
+        <div class="hero-card">
+            <h3>Quick Notes</h3>
+            <p class="small">1. Login to use cart, orders, favorites, and reviews.</p>
+            <p class="small">2. Use Dashboard for buyer/seller workbenches.</p>
+            <p class="small">3. Seller can manage inventory and order status end-to-end.</p>
+        </div>
+    </section>
+
+    <div class="section-title">
+        <h2>Featured Products</h2>
+        <span class="small">Use Add to Cart/Favorite directly from cards</span>
+    </div>
+
+    <section id="productGrid" class="grid" th:if="${products != null}">
+        <article class="card" th:each="product : ${products}">
+            <h3 th:text="${product.name}">Product</h3>
+            <p class="muted" th:text="${product.description}">Description</p>
+            <p class="small">Category: <span th:text="${product.category.name}">Category</span></p>
+            <p class="small">Stock: <span th:text="${product.quantity}">0</span></p>
+            <div class="price" th:text="${product.discountedPrice != null ? product.discountedPrice : product.price}">0</div>
+            <div class="strike" th:text="'MRP: ' + ${product.price}">0</div>
+            <div class="row" style="margin-top:0.6rem;">
+                <button class="btn btn-primary" th:attr="onclick='addToCart(' + ${product.id} + ')'">Add to Cart</button>
+                <button class="btn btn-secondary" th:attr="onclick='addFavorite(' + ${product.id} + ')'">Favorite</button>
+                <button class="btn btn-secondary" th:attr="onclick='loadReviews(' + ${product.id} + ')'">Reviews</button>
+            </div>
+        </article>
+    </section>
+
+    <div id="outputLog" class="log">Action responses will appear here.</div>
 </main>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/storefront.js}"></script>
 </body>
 </html>

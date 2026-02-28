@@ -7,19 +7,37 @@
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
-<header class="hero compact">
-    <h1>Login</h1>
-    <p>Use your buyer or seller credentials.</p>
+<header class="topbar">
+    <div class="topbar-row">
+        <a class="brand" href="/">RevShop</a>
+        <div class="nav-links">
+            <a class="btn btn-secondary" href="/register/buyer">Buyer Signup</a>
+            <a class="btn btn-secondary" href="/register/seller">Seller Signup</a>
+        </div>
+    </div>
 </header>
 
-<section class="notifications">
-    <form class="note" method="post" action="/login">
-        <label>Email</label>
-        <input type="email" name="username" required>
-        <label>Password</label>
-        <input type="password" name="password" required>
-        <button class="cta" type="submit">Sign In</button>
-    </form>
-</section>
+<main class="page">
+    <section class="form-wrap">
+        <h1>Sign In</h1>
+        <p class="small">Login with your registered buyer/seller email and password.</p>
+        <form method="post" action="/login">
+            <label>Email</label>
+            <input type="email" name="username" required>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <button class="btn btn-primary" type="submit" style="margin-top:1rem; width:100%;">Login</button>
+        </form>
+
+        <p th:if="${param.error}" style="color:#dc2626;">Invalid email/password.</p>
+        <p th:if="${param.logout}" style="color:#16a34a;">Logged out successfully.</p>
+
+        <hr>
+        <div class="row">
+            <a class="btn btn-secondary" href="/register/buyer">Create Buyer Account</a>
+            <a class="btn btn-secondary" href="/register/seller">Create Seller Account</a>
+        </div>
+    </section>
+</main>
 </body>
 </html>
