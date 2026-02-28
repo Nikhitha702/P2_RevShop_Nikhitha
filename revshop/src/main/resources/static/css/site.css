@@ -44,6 +44,18 @@ h1 {
     text-decoration: none;
 }
 
+.hero-links {
+    margin-top: 0.8rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-links a {
+    color: var(--ink);
+}
+
 .grid {
     display: grid;
     gap: 1rem;
@@ -76,4 +88,24 @@ h1 {
     padding: 1rem;
     max-width: 760px;
     margin: 0 auto;
+}
+
+label {
+    display: block;
+    margin-top: 0.6rem;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    margin-top: 0.2rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid #ced7d3;
+    border-radius: 10px;
+}
+
+form .cta {
+    margin-top: 1rem;
+    border: none;
+    cursor: pointer;
 }

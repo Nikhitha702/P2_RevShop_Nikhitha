@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Registration - RevShop</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="hero compact">
+    <h1>Seller Registration</h1>
+    <p>Create your seller account</p>
+</header>
+
+<section class="notifications">
+    <form class="note" id="sellerForm">
+        <label>First Name</label><input name="firstName" required>
+        <label>Last Name</label><input name="lastName" required>
+        <label>Email</label><input type="email" name="email" required>
+        <label>Password</label><input type="password" name="password" required>
+        <label>Phone</label><input name="phone" required>
+        <label>Address</label><input name="address" required>
+        <label>Business Name</label><input name="businessName" required>
+        <label>GST Number</label><input name="gstNumber" required>
+        <label>Category</label><input name="category" required>
+        <button class="cta" type="submit">Register Seller</button>
+        <p id="msg"></p>
+    </form>
+</section>
+
+<script>
+    document.getElementById('sellerForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const payload = Object.fromEntries(new FormData(e.target).entries());
+        const res = await fetch('/api/auth/register/seller', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        document.getElementById('msg').textContent = await res.text();
+    });
+</script>
+</body>
+</html>

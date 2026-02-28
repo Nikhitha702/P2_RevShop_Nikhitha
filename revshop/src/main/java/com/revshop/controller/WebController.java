@@ -21,6 +21,21 @@ public class WebController {
         return "index";
     }
 
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/register/buyer")
+    public String buyerRegisterPage() {
+        return "register-buyer";
+    }
+
+    @GetMapping("/register/seller")
+    public String sellerRegisterPage() {
+        return "register-seller";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("notifications", notificationService.getMyNotifications());
