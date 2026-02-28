@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,7 @@ public class Cart {
     // One cart per buyer
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnoreProperties({"password", "roles"})
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)

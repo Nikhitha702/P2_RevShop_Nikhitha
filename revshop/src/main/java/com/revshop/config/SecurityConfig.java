@@ -17,32 +17,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login", "/register/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/orders/**").authenticated()
-                        .requestMatchers("/api/payments/**").authenticated()
-                        .requestMatchers("/api/reviews/**").authenticated()
+                        .requestMatchers("/api/reviews/product/**").permitAll()
+                        .requestMatchers("/api/cart/**", "/api/orders/**", "/api/payments/**", "/api/favorites/**", "/api/notifications/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
 
-    // ✅ Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Authentication Manager (IMPORTANT FIX)
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

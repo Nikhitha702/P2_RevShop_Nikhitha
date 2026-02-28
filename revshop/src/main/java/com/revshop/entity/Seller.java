@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class Seller {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"password", "roles"})
     private User user;
 
     @Column(nullable = false)

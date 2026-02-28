@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,10 +21,12 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnoreProperties({"items", "user"})
     private Cart cart;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnoreProperties({"seller"})
     private Product product;
 
     private Integer quantity;

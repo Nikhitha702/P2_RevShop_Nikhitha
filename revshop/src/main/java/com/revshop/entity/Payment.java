@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnoreProperties({"items", "user"})
     private Order order;
 
     private BigDecimal amount;
