@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard - RevShop</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="hero compact">
+    <h1>Buyer Dashboard</h1>
+    <p>Quick actions for cart, favorites, orders, and notifications</p>
+    <a href="/dashboard" class="cta">Back</a>
+</header>
+
+<section class="grid">
+    <article class="card">
+        <h2>Cart</h2>
+        <label>Product Id</label><input id="cartProductId" type="number">
+        <label>Quantity</label><input id="cartQty" type="number" value="1">
+        <button class="cta" onclick="addToCart()">Add To Cart</button>
+        <button class="cta" onclick="loadCartTotal()">Cart Total</button>
+    </article>
+
+    <article class="card">
+        <h2>Favorites</h2>
+        <label>Product Id</label><input id="favProductId" type="number">
+        <button class="cta" onclick="addFavorite()">Add Favorite</button>
+        <button class="cta" onclick="loadFavorites()">View Favorites</button>
+    </article>
+
+    <article class="card">
+        <h2>Orders</h2>
+        <label>Shipping Address</label><input id="shipAddress" placeholder="address">
+        <label>Billing Address</label><input id="billAddress" placeholder="address">
+        <button class="cta" onclick="checkout()">Checkout</button>
+        <button class="cta" onclick="loadMyOrders()">My Orders</button>
+    </article>
+
+    <article class="card">
+        <h2>Notifications</h2>
+        <button class="cta" onclick="loadNotifications()">Load Notifications</button>
+    </article>
+</section>
+
+<section class="notifications">
+    <pre class="note" id="output">Run an action to see response...</pre>
+</section>
+
+<script>
+    async function callApi(url, options) {
+        const res = await fetch(url, options || {});
+        const text = await res.text();
+        try {
+            document.getElementById('output').textContent = JSON.stringify(JSON.parse(text), null, 2);
+        } catch (_) {
+            document.getElementById('output').textContent = text;
+        }
+    }
+
+    async function addToCart() {
+        const productId = document.getElementById('cartProductId').value;
+        const qty = document.getElementById('cartQty').value;
+        await callApi(`/api/cart/add?productId=${productId}&quantity=${qty}`, {method: 'POST'});
+    }
+
+    async function loadCartTotal() {
+        await callApi('/api/cart/total');
+    }
+
+    async function addFavorite() {
+        const productId = document.getElementById('favProductId').value;
+        await callApi(`/api/favorites/${productId}`, {method: 'POST'});
+    }
+
+    async function loadFavorites() {
+        await callApi('/api/favorites');
+    }
+
+    async function checkout() {
+        const payload = {
+            shippingAddress: document.getElementById('shipAddress').value,
+            billingAddress: document.getElementById('billAddress').value
+        };
+        await callApi('/api/orders/checkout', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async function loadMyOrders() {
+        await callApi('/api/orders/my-orders');
+    }
+
+    async function loadNotifications() {
+        await callApi('/api/notifications');
+    }
+</script>
+</body>
+</html>
