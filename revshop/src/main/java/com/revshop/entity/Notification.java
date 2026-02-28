@@ -7,32 +7,28 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "notifications")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnoreProperties({"seller"})
-    private Product product;
-
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties({"password", "roles"})
     private User user;
 
-    private Integer rating;
+    @Column(nullable = false, length = 500)
+    private String message;
 
-    @Column(name = "review_comment")
-    private String comment;
+    @Column(nullable = false)
+    private Boolean readStatus;
 
     private LocalDateTime createdAt;
 }

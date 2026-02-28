@@ -5,8 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ProductRequest {
-
+public class ProductUpdateRequest {
     private String name;
     private String description;
     private BigDecimal price;
@@ -14,4 +13,5 @@ public class ProductRequest {
     private Integer quantity;
     private Integer inventoryThreshold;
     private String categoryName;
+    private Boolean active;
 }

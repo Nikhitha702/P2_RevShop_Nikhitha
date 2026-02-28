@@ -1,14 +1,13 @@
 package com.revshop.service;
 
+import com.revshop.entity.OrderStatus;
 import com.revshop.entity.Product;
 import com.revshop.entity.Review;
 import com.revshop.entity.User;
 import com.revshop.repository.OrderRepository;
 import com.revshop.repository.ProductRepository;
 import com.revshop.repository.ReviewRepository;
-import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,41 +19,29 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
     private final OrderRepository orderRepository;
 
     public String addReview(Long productId, Integer rating, String comment) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new RuntimeException("Rating must be between 1 and 5");
+        }
 
-        // 🔹 Get logged-in user email
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = currentUserService.getCurrentUser();
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // 🔹 Check if user has at least one DELIVERED order
-        boolean delivered = orderRepository
-                .findByUserId(user.getId())
-                .stream()
-                .anyMatch(order ->
-                        order.getStatus() != null &&
-                                order.getStatus().toString().equalsIgnoreCase("DELIVERED")
-                );
+        boolean deliveredForProduct = orderRepository
+                .existsByUserIdAndStatusAndItemsProductId(user.getId(), OrderStatus.DELIVERED, productId);
 
-        if (!delivered) {
-            return "You can review only delivered products";
+        if (!deliveredForProduct) {
+            return "You can review only delivered purchased products";
         }
 
-        // 🔹 Prevent duplicate review
         if (reviewRepository.existsByProductIdAndUserId(productId, user.getId())) {
             return "You already reviewed this product";
         }
 
-        // 🔹 Save review
         Review review = Review.builder()
                 .product(product)
                 .user(user)
@@ -64,7 +51,6 @@ public class ReviewService {
                 .build();
 
         reviewRepository.save(review);
-
         return "Review added successfully";
     }
 

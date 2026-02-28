@@ -3,6 +3,7 @@ package com.revshop.controller;
 import com.revshop.entity.Cart;
 import com.revshop.service.CartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('BUYER')")
 public class CartController {
 
     private final CartService cartService;

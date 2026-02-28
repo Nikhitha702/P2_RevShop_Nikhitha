@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,9 +33,12 @@ public class Product {
 
     @Column(nullable = false)
     private Integer quantity;
+    private Integer inventoryThreshold;
+    private Boolean active;
 
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonIgnoreProperties({"user"})
     private Seller seller;
 
     @ManyToOne

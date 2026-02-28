@@ -43,6 +43,9 @@ public class AuthService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .address(request.getAddress())
+                .createdAt(LocalDateTime.now())
                 .enabled(true)
                 .roles(Collections.singleton(role))
                 .build();
@@ -70,6 +73,9 @@ public class AuthService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .address(request.getAddress())
+                .createdAt(LocalDateTime.now())
                 .enabled(true)
                 .roles(Collections.singleton(role))
                 .build();

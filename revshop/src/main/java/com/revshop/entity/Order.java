@@ -1,5 +1,6 @@
 package com.revshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +23,14 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"password", "roles"})
     private User user;
+
+    @Column(length = 500)
+    private String shippingAddress;
+
+    @Column(length = 500)
+    private String billingAddress;
 
     private BigDecimal totalAmount;
 
@@ -32,5 +40,6 @@ public class Order {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"order"})
     private List<OrderItem> items;
 }
