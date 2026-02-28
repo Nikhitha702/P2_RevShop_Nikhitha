@@ -9,7 +9,7 @@
 <body>
 <header class="hero compact">
     <h1>Buyer Dashboard</h1>
-    <p>Quick actions for cart, favorites, orders, and notifications</p>
+    <p>Quick actions for cart, favorites, orders, payment, reviews, and notifications</p>
     <a href="/dashboard" class="cta">Back</a>
 </header>
 
@@ -38,8 +38,25 @@
     </article>
 
     <article class="card">
+        <h2>Payment</h2>
+        <label>Order Id</label><input id="payOrderId" type="number">
+        <label>Method</label><input id="payMethod" placeholder="CREDIT_CARD">
+        <button class="cta" onclick="payOrder()">Pay</button>
+    </article>
+
+    <article class="card">
+        <h2>Review</h2>
+        <label>Product Id</label><input id="reviewProductId" type="number">
+        <label>Rating (1-5)</label><input id="reviewRating" type="number" min="1" max="5" value="5">
+        <label>Comment</label><textarea id="reviewComment" rows="3"></textarea>
+        <button class="cta" onclick="addReview()">Add Review</button>
+    </article>
+
+    <article class="card">
         <h2>Notifications</h2>
+        <label>Notification Id</label><input id="noteId" type="number">
         <button class="cta" onclick="loadNotifications()">Load Notifications</button>
+        <button class="cta" onclick="markNotificationRead()">Mark Read</button>
     </article>
 </section>
 
@@ -93,8 +110,26 @@
         await callApi('/api/orders/my-orders');
     }
 
+    async function payOrder() {
+        const orderId = document.getElementById('payOrderId').value;
+        const method = document.getElementById('payMethod').value;
+        await callApi(`/api/payments/pay?orderId=${orderId}&method=${method}`, {method: 'POST'});
+    }
+
+    async function addReview() {
+        const productId = document.getElementById('reviewProductId').value;
+        const rating = document.getElementById('reviewRating').value;
+        const comment = encodeURIComponent(document.getElementById('reviewComment').value);
+        await callApi(`/api/reviews/add?productId=${productId}&rating=${rating}&comment=${comment}`, {method: 'POST'});
+    }
+
     async function loadNotifications() {
         await callApi('/api/notifications');
+    }
+
+    async function markNotificationRead() {
+        const id = document.getElementById('noteId').value;
+        await callApi(`/api/notifications/${id}/read`, {method: 'PUT'});
     }
 </script>
 </body>

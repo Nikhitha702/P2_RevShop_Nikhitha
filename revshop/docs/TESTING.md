@@ -1,19 +1,30 @@
 # Testing Artifacts
 
-## Current Automated Test
-- `RevshopApplicationTests` (Spring context load)
+## Automated Test Coverage
+- `RevshopApplicationTests` (context load using test profile)
+- Service unit tests:
+  - `CartServiceTest`
+  - `OrderServiceTest`
+  - `PaymentServiceTest`
+  - `ReviewServiceTest`
+- Controller/security integration test:
+  - `RoleAccessControllerTest`
 
-## Validation Performed
-- Application compiles and tests pass with:
+## Test Profile
+- `src/test/resources/application-test.properties`
+- H2 in-memory DB, Oracle mode
+- `ddl-auto=create-drop`
+
+## Commands
+- Run all tests:
   ```bash
   ./mvnw -q test
   ```
-- JPA schema migration was validated against Oracle with `ddl-auto=update`.
 
-## Suggested Additional Tests
-1. Service unit tests for cart, checkout, payment, and review logic.
-2. Repository tests for seller order queries and favorites uniqueness.
-3. Controller integration tests for role-based authorization paths.
-4. End-to-end test scenario:
-   - Buyer registration -> login -> add to cart -> checkout -> payment -> review.
-   - Seller login -> inventory view -> order status update -> low-stock alert.
+## CI Verification
+- GitHub Actions workflow `.github/workflows/ci.yml` executes `./mvnw -q test` on pushes/PRs.
+
+## Manual E2E Scenarios (for demo)
+1. Buyer: register -> login -> add to cart -> checkout -> payment -> review.
+2. Seller: register -> login -> add product -> view seller orders -> update order status.
+3. Notifications: verify buyer/seller receive updates for order and status changes.

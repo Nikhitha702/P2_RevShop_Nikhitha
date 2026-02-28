@@ -1,0 +1,76 @@
+{
+  "info": {
+    "name": "RevShop API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "buyerEmail", "value": "buyer@example.com" },
+    { "key": "buyerPassword", "value": "buyer123" },
+    { "key": "sellerEmail", "value": "seller@example.com" },
+    { "key": "sellerPassword", "value": "seller123" }
+  ],
+  "item": [
+    {
+      "name": "Auth - Register Buyer",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/auth/register/buyer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Buyer\",\n  \"lastName\": \"User\",\n  \"email\": \"{{buyerEmail}}\",\n  \"password\": \"{{buyerPassword}}\",\n  \"phone\": \"9999999999\",\n  \"address\": \"Hyd\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Register Seller",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/auth/register/seller",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Seller\",\n  \"lastName\": \"User\",\n  \"email\": \"{{sellerEmail}}\",\n  \"password\": \"{{sellerPassword}}\",\n  \"phone\": \"8888888888\",\n  \"address\": \"Hyd\",\n  \"businessName\": \"RevStore\",\n  \"gstNumber\": \"GST12345\",\n  \"category\": \"Electronics\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Products - List",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products"
+      }
+    },
+    {
+      "name": "Cart - Add (Buyer Basic Auth)",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "username", "value": "{{buyerEmail}}", "type": "string" },
+            { "key": "password", "value": "{{buyerPassword}}", "type": "string" }
+          ]
+        },
+        "url": "{{baseUrl}}/api/cart/add?productId=1&quantity=1"
+      }
+    },
+    {
+      "name": "Orders - Checkout (Buyer Basic Auth)",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "username", "value": "{{buyerEmail}}", "type": "string" },
+            { "key": "password", "value": "{{buyerPassword}}", "type": "string" }
+          ]
+        },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/orders/checkout",
+        "body": { "mode": "raw", "raw": "{\n  \"shippingAddress\": \"Hyd\",\n  \"billingAddress\": \"Hyd\"\n}" }
+      }
+    }
+  ]
+}

@@ -9,11 +9,31 @@
 <body>
 <header class="hero compact">
     <h1>Seller Dashboard</h1>
-    <p>Quick actions for inventory, orders, and notifications</p>
+    <p>Quick actions for products, inventory, seller orders, and notifications</p>
     <a href="/dashboard" class="cta">Back</a>
 </header>
 
 <section class="grid">
+    <article class="card">
+        <h2>Add Product</h2>
+        <label>Name</label><input id="pName">
+        <label>Description</label><textarea id="pDesc" rows="3"></textarea>
+        <label>Price</label><input id="pPrice" type="number">
+        <label>Discounted Price</label><input id="pDiscount" type="number">
+        <label>Quantity</label><input id="pQty" type="number">
+        <label>Category</label><input id="pCategory">
+        <button class="cta" onclick="addProduct()">Add Product</button>
+    </article>
+
+    <article class="card">
+        <h2>Update/Delete Product</h2>
+        <label>Product Id</label><input id="uId" type="number">
+        <label>New Quantity</label><input id="uQty" type="number">
+        <label>New Price</label><input id="uPrice" type="number">
+        <button class="cta" onclick="updateProduct()">Update</button>
+        <button class="cta" onclick="deleteProduct()">Delete</button>
+    </article>
+
     <article class="card">
         <h2>Inventory</h2>
         <button class="cta" onclick="loadInventory()">View Inventory</button>
@@ -47,6 +67,40 @@
         } catch (_) {
             document.getElementById('output').textContent = text;
         }
+    }
+
+    async function addProduct() {
+        const payload = {
+            name: document.getElementById('pName').value,
+            description: document.getElementById('pDesc').value,
+            price: Number(document.getElementById('pPrice').value),
+            discountedPrice: Number(document.getElementById('pDiscount').value),
+            quantity: Number(document.getElementById('pQty').value),
+            categoryName: document.getElementById('pCategory').value
+        };
+        await callApi('/api/products', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async function updateProduct() {
+        const id = document.getElementById('uId').value;
+        const payload = {
+            quantity: Number(document.getElementById('uQty').value),
+            price: Number(document.getElementById('uPrice').value)
+        };
+        await callApi(`/api/products/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async function deleteProduct() {
+        const id = document.getElementById('uId').value;
+        await callApi(`/api/products/${id}`, {method: 'DELETE'});
     }
 
     async function loadInventory() {
