@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.OrderStatus;
 import com.revshop.entity.Product;
 import com.revshop.entity.Review;
@@ -22,7 +23,7 @@ public class ReviewService {
     private final CurrentUserService currentUserService;
     private final OrderRepository orderRepository;
 
-    public String addReview(Long productId, Integer rating, String comment) {
+    public ApiResponse addReview(Long productId, Integer rating, String comment) {
         if (rating == null || rating < 1 || rating > 5) {
             throw new RuntimeException("Rating must be between 1 and 5");
         }
@@ -35,11 +36,11 @@ public class ReviewService {
                 .existsByUserIdAndStatusAndItemsProductId(user.getId(), OrderStatus.DELIVERED, productId);
 
         if (!deliveredForProduct) {
-            return "You can review only delivered purchased products";
+            return new ApiResponse(false, "You can review only delivered purchased products");
         }
 
         if (reviewRepository.existsByProductIdAndUserId(productId, user.getId())) {
-            return "You already reviewed this product";
+            return new ApiResponse(false, "You already reviewed this product");
         }
 
         Review review = Review.builder()
@@ -51,7 +52,7 @@ public class ReviewService {
                 .build();
 
         reviewRepository.save(review);
-        return "Review added successfully";
+        return new ApiResponse(true, "Review added successfully");
     }
 
     public List<Review> getProductReviews(Long productId) {

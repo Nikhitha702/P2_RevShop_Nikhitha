@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Favorite;
 import com.revshop.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,12 @@ public class FavoriteController {
     private final FavoriteService favoriteService;
 
     @PostMapping("/{productId}")
-    public String addFavorite(@PathVariable Long productId) {
+    public ApiResponse addFavorite(@PathVariable Long productId) {
         return favoriteService.addFavorite(productId);
     }
 
     @DeleteMapping("/{productId}")
-    public String removeFavorite(@PathVariable Long productId) {
+    public ApiResponse removeFavorite(@PathVariable Long productId) {
         return favoriteService.removeFavorite(productId);
     }
 

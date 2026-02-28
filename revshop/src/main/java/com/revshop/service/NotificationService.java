@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Notification;
 import com.revshop.entity.User;
 import com.revshop.repository.NotificationRepository;
@@ -31,7 +32,7 @@ public class NotificationService {
         return notificationRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
-    public String markAsRead(Long notificationId) {
+    public ApiResponse markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
         User user = currentUserService.getCurrentUser();
@@ -40,6 +41,6 @@ public class NotificationService {
         }
         notification.setReadStatus(true);
         notificationRepository.save(notification);
-        return "Notification marked as read";
+        return new ApiResponse(true, "Notification marked as read");
     }
 }

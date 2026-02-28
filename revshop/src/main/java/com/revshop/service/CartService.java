@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Cart;
 import com.revshop.entity.CartItem;
 import com.revshop.entity.Product;
@@ -22,7 +23,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final CurrentUserService currentUserService;
 
-    public String addToCart(Long productId, Integer quantity) {
+    public ApiResponse addToCart(Long productId, Integer quantity) {
         if (quantity == null || quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
         }
@@ -62,7 +63,7 @@ public class CartService {
             cartItemRepository.save(newItem);
         }
 
-        return "Product added to cart";
+        return new ApiResponse(true, "Product added to cart");
     }
 
     public Cart viewCart() {
@@ -71,18 +72,18 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("Cart is empty"));
     }
 
-    public String removeFromCart(Long cartItemId) {
+    public ApiResponse removeFromCart(Long cartItemId) {
         CartItem item = getOwnedCartItem(cartItemId);
         cartItemRepository.delete(item);
-        return "Item removed from cart";
+        return new ApiResponse(true, "Item removed from cart");
     }
 
-    public String updateQuantity(Long cartItemId, Integer quantity) {
+    public ApiResponse updateQuantity(Long cartItemId, Integer quantity) {
         CartItem item = getOwnedCartItem(cartItemId);
 
         if (quantity == null || quantity <= 0) {
             cartItemRepository.delete(item);
-            return "Item removed from cart";
+            return new ApiResponse(true, "Item removed from cart");
         }
 
         if (quantity > item.getProduct().getQuantity()) {
@@ -92,7 +93,7 @@ public class CartService {
         item.setQuantity(quantity);
         item.setSubtotal(resolveUnitPrice(item.getProduct()).multiply(BigDecimal.valueOf(quantity)));
         cartItemRepository.save(item);
-        return "Cart updated successfully";
+        return new ApiResponse(true, "Cart updated successfully");
     }
 
     public BigDecimal calculateTotal() {
@@ -102,10 +103,10 @@ public class CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public String clearCart() {
+    public ApiResponse clearCart() {
         Cart cart = viewCart();
         cartItemRepository.deleteAll(cart.getItems());
-        return "Cart cleared successfully";
+        return new ApiResponse(true, "Cart cleared successfully");
     }
 
     private CartItem getOwnedCartItem(Long cartItemId) {

@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Order;
 import com.revshop.entity.OrderStatus;
 import com.revshop.entity.Payment;
@@ -22,7 +23,7 @@ public class PaymentService {
     private final CurrentUserService currentUserService;
     private final NotificationService notificationService;
 
-    public String makePayment(Long orderId, PaymentMethod method) {
+    public ApiResponse makePayment(Long orderId, PaymentMethod method) {
         User user = currentUserService.getCurrentUser();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -32,11 +33,11 @@ public class PaymentService {
         }
 
         if (!order.getStatus().equals(OrderStatus.PLACED)) {
-            return "Order already paid or invalid status";
+            return new ApiResponse(false, "Order already paid or invalid status");
         }
 
         if (paymentRepository.findByOrderId(orderId).isPresent()) {
-            return "Payment already exists for this order";
+            return new ApiResponse(false, "Payment already exists for this order");
         }
 
         Payment payment = Payment.builder()
@@ -57,6 +58,6 @@ public class PaymentService {
 
         orderRepository.save(order);
         notificationService.createNotification(user, "Payment successful for order: " + order.getId());
-        return "Payment Successful";
+        return new ApiResponse(true, "Payment Successful");
     }
 }

@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Review;
 import com.revshop.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class ReviewController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('BUYER')")
-    public String addReview(@RequestParam Long productId,
+    public ApiResponse addReview(@RequestParam Long productId,
                             @RequestParam Integer rating,
                             @RequestParam String comment) {
         return reviewService.addReview(productId, rating, comment);

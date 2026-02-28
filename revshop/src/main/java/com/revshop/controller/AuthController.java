@@ -1,6 +1,7 @@
 package com.revshop.controller;
 
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ApiResponse;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +20,19 @@ public class AuthController {
 
     // 🛍 Buyer Registration
     @PostMapping("/register/buyer")
-    public String registerBuyer(@RequestBody BuyerRegisterRequest request) {
+    public ApiResponse registerBuyer(@RequestBody BuyerRegisterRequest request) {
         return authService.registerBuyer(request);
     }
 
     // 🏬 Seller Registration
     @PostMapping("/register/seller")
-    public String registerSeller(@RequestBody SellerRegisterRequest request) {
+    public ApiResponse registerSeller(@RequestBody SellerRegisterRequest request) {
         return authService.registerSeller(request);
     }
 
     // 🔐 Login
     @PostMapping("/login")
-    public String login(@RequestParam String email,
+    public ApiResponse login(@RequestParam String email,
                         @RequestParam String password) {
 
         Authentication authentication =
@@ -41,13 +42,13 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return "Login Successful";
+        return new ApiResponse(true, "Login Successful");
     }
 
     // 🚪 Logout
     @PostMapping("/logout")
-    public String logout() {
+    public ApiResponse logout() {
         SecurityContextHolder.clearContext();
-        return "Logged out successfully";
+        return new ApiResponse(true, "Logged out successfully");
     }
 }

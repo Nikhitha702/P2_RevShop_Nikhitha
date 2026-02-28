@@ -1,5 +1,6 @@
 package com.revshop.controller;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Notification;
 import com.revshop.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{notificationId}/read")
-    public String markAsRead(@PathVariable Long notificationId) {
+    public ApiResponse markAsRead(@PathVariable Long notificationId) {
         return notificationService.markAsRead(notificationId);
     }
 }

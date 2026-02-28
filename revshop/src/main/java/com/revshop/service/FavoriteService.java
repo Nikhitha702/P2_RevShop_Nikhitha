@@ -1,5 +1,6 @@
 package com.revshop.service;
 
+import com.revshop.dto.ApiResponse;
 import com.revshop.entity.Favorite;
 import com.revshop.entity.Product;
 import com.revshop.entity.User;
@@ -19,13 +20,13 @@ public class FavoriteService {
     private final ProductRepository productRepository;
     private final CurrentUserService currentUserService;
 
-    public String addFavorite(Long productId) {
+    public ApiResponse addFavorite(Long productId) {
         User user = currentUserService.getCurrentUser();
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         if (favoriteRepository.findByUserIdAndProductId(user.getId(), productId).isPresent()) {
-            return "Product already in favorites";
+            return new ApiResponse(false, "Product already in favorites");
         }
 
         Favorite favorite = Favorite.builder()
@@ -34,15 +35,15 @@ public class FavoriteService {
                 .createdAt(LocalDateTime.now())
                 .build();
         favoriteRepository.save(favorite);
-        return "Product added to favorites";
+        return new ApiResponse(true, "Product added to favorites");
     }
 
-    public String removeFavorite(Long productId) {
+    public ApiResponse removeFavorite(Long productId) {
         User user = currentUserService.getCurrentUser();
         Favorite favorite = favoriteRepository.findByUserIdAndProductId(user.getId(), productId)
                 .orElseThrow(() -> new RuntimeException("Favorite not found"));
         favoriteRepository.delete(favorite);
-        return "Product removed from favorites";
+        return new ApiResponse(true, "Product removed from favorites");
     }
 
     public List<Favorite> getMyFavorites() {
