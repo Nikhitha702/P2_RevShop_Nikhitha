@@ -1,100 +1,61 @@
 package com.revshop.service;
 
-import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.ApiResponse;
+import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.Role;
-import com.revshop.entity.Seller;
 import com.revshop.entity.User;
-import com.revshop.repository.RoleRepository;
-import com.revshop.repository.SellerRepository;
 import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 🛍 Buyer Registration
+    @Transactional
     public ApiResponse registerBuyer(BuyerRegisterRequest request) {
-
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return new ApiResponse(false, "Email already exists!");
+        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            throw new IllegalArgumentException("Email is already registered");
         }
 
-        Role role = roleRepository.findByName("ROLE_BUYER")
-                .orElseGet(() ->
-                        roleRepository.save(Role.builder()
-                                .name("ROLE_BUYER")
-                                .build())
-                );
+        User buyer = mapCommonFields(request);
+        buyer.setRole(Role.ROLE_BUYER);
+        userRepository.save(buyer);
 
-        User user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .createdAt(LocalDateTime.now())
-                .enabled(true)
-                .roles(Collections.singleton(role))
-                .build();
-
-        userRepository.save(user);
-
-        return new ApiResponse(true, "Buyer Registered Successfully");
+        return new ApiResponse(true, "Buyer account created successfully");
     }
 
+    @Transactional
     public ApiResponse registerSeller(SellerRegisterRequest request) {
-
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return new ApiResponse(false, "Email already exists!");
+        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            throw new IllegalArgumentException("Email is already registered");
         }
 
-        Role role = roleRepository.findByName("ROLE_SELLER")
-                .orElseGet(() ->
-                        roleRepository.save(Role.builder()
-                                .name("ROLE_SELLER")
-                                .build())
-                );
+        User seller = mapCommonFields(request);
+        seller.setRole(Role.ROLE_SELLER);
+        seller.setBusinessName(request.getBusinessName());
+        seller.setGstNumber(request.getGstNumber());
+        seller.setBusinessCategory(request.getBusinessCategory());
+        userRepository.save(seller);
 
-        User user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .createdAt(LocalDateTime.now())
-                .enabled(true)
-                .roles(Collections.singleton(role))
-                .build();
+        return new ApiResponse(true, "Seller account created successfully");
+    }
 
-        userRepository.save(user);
-
-        Seller seller = Seller.builder()
-                .user(user)
-                .businessName(request.getBusinessName())
-                .gstNumber(request.getGstNumber())
-                .address(request.getAddress())
-                .phone(request.getPhone())
-                .category(request.getCategory())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        sellerRepository.save(seller);
-
-        return new ApiResponse(true, "Seller Registered Successfully");
+    private User mapCommonFields(BuyerRegisterRequest request) {
+        User user = new User();
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
+        user.setEmail(request.getEmail().trim().toLowerCase());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPhone(request.getPhone().trim());
+        user.setAddress(request.getAddress().trim());
+        user.setEnabled(true);
+        return user;
     }
 }
