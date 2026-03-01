@@ -1,0 +1,4 @@
+.hero-wrap {
+    min-height: calc(100vh - 56px);
+    background: linear-gradient(120deg, #f8fbff 0%, #e8f0ff 55%, #fef8ec 100%);
+}

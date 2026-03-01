@@ -1,54 +1,37 @@
 package com.revshop.controller;
 
-import com.revshop.service.NotificationService;
-import com.revshop.service.ProductService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-@RequiredArgsConstructor
 public class WebController {
 
-    private final ProductService productService;
-    private final NotificationService notificationService;
-
     @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("products", productService.getAllProducts(PageRequest.of(0, 12)).getContent());
+    public String home() {
         return "index";
     }
 
     @GetMapping("/login")
-    public String loginPage() {
+    public String login() {
         return "login";
     }
 
     @GetMapping("/register/buyer")
-    public String buyerRegisterPage() {
+    public String registerBuyer() {
         return "register-buyer";
     }
 
     @GetMapping("/register/seller")
-    public String sellerRegisterPage() {
+    public String registerSeller() {
         return "register-seller";
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("notifications", notificationService.getMyNotifications());
+    public String dashboard(Authentication authentication, Model model) {
+        model.addAttribute("email", authentication.getName());
+        model.addAttribute("authorities", authentication.getAuthorities());
         return "dashboard";
-    }
-
-    @GetMapping("/dashboard/buyer")
-    public String buyerDashboard() {
-        return "buyer-dashboard";
-    }
-
-    @GetMapping("/dashboard/seller")
-    public String sellerDashboard() {
-        return "seller-dashboard";
     }
 }

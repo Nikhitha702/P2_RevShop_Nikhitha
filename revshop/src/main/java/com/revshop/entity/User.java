@@ -1,46 +1,50 @@
 package com.revshop.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
-import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "app_users", uniqueConstraints = @UniqueConstraint(name = "uk_user_email", columnNames = "email"))
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 80)
     private String firstName;
+
+    @Column(nullable = false, length = 80)
     private String lastName;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, length = 120)
     private String email;
 
-    @JsonIgnore
+    @Column(nullable = false, length = 255)
     private String password;
+
+    @Column(nullable = false, length = 20)
     private String phone;
+
+    @Column(nullable = false, length = 300)
     private String address;
-    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
+
+    @Column(length = 160)
+    private String businessName;
+
+    @Column(length = 40)
+    private String gstNumber;
+
+    @Column(length = 100)
+    private String businessCategory;
 
     @Column(nullable = false)
-    private Boolean enabled = true;
-
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+    private boolean enabled = true;
 }

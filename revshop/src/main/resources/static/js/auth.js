@@ -1,21 +1,15 @@
-async function register(event, formId, endpoint, messageId, redirectToLogin = true) {
+async function registerUser(event, formId, endpoint, messageId) {
     event.preventDefault();
+
     const form = document.getElementById(formId);
     const payload = Object.fromEntries(new FormData(form).entries());
 
-    const csrfMeta = document.querySelector('meta[name="_csrf"]');
-    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-    const tokenFromMeta = csrfMeta ? csrfMeta.getAttribute('content') : null;
-    const headerName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : 'X-XSRF-TOKEN';
-    const tokenFromCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-    const token = tokenFromMeta || (tokenFromCookie ? decodeURIComponent(tokenFromCookie) : null);
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-XSRF-TOKEN';
 
     const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-        headers[headerName] = token;
+    if (csrfToken) {
+        headers[csrfHeader] = csrfToken;
     }
 
     const res = await fetch(endpoint, {
@@ -24,36 +18,32 @@ async function register(event, formId, endpoint, messageId, redirectToLogin = tr
         body: JSON.stringify(payload)
     });
 
+    const msgEl = document.getElementById(messageId);
     const contentType = res.headers.get('content-type') || '';
-    let data = null;
+
     let message = 'Request failed';
+    let success = false;
 
     if (contentType.includes('application/json')) {
-        try {
-            data = await res.json();
-            message = data.message || data.error || message;
-            if (data.details && typeof data.details === 'object') {
-                const detailText = Object.entries(data.details)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ');
-                message = `${message}. ${detailText}`;
-            }
-        } catch (e) {
-            message = 'Unable to parse server response';
+        const body = await res.json();
+        success = !!body.success && res.ok;
+        message = body.message || message;
+
+        if (body.details) {
+            const details = Object.entries(body.details)
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(', ');
+            message = `${message}. ${details}`;
         }
     } else {
         const text = await res.text();
-        if (text && text.trim().length > 0) {
-            message = text.length > 180 ? `${text.substring(0, 180)}...` : text;
-        }
+        message = text ? text.substring(0, 200) : message;
     }
 
-    const msgEl = document.getElementById(messageId);
-    const success = !!(data && data.success && res.ok);
-    msgEl.textContent = success ? (data.message || 'Registration successful') : message;
-    msgEl.style.color = success ? '#16a34a' : '#dc2626';
+    msgEl.textContent = message;
+    msgEl.className = success ? 'mt-3 small text-success' : 'mt-3 small text-danger';
 
-    if (success && redirectToLogin) {
+    if (success) {
         setTimeout(() => window.location.href = '/login', 1200);
     }
 }
