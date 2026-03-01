@@ -28,6 +28,11 @@ public class ProductController {
         return productService.browseProducts(pageable);
     }
 
+    @GetMapping("/all")
+    public List<Product> browseAllProducts() {
+        return productService.browseAllActiveProducts();
+    }
+
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable Long id) {
         return productService.getProduct(id);

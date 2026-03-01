@@ -100,6 +100,10 @@ public class ProductService {
         return productRepository.findByActiveTrue(pageable);
     }
 
+    public List<Product> browseAllActiveProducts() {
+        return productRepository.findByActiveTrueOrderByCreatedAtDesc();
+    }
+
     public Page<Product> searchProducts(String keyword, Pageable pageable) {
         return productRepository.findByActiveTrueAndNameContainingIgnoreCase(keyword, pageable);
     }
