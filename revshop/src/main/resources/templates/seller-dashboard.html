@@ -28,7 +28,7 @@
         <div class="col-lg-6">
             <div class="card section-card p-3">
                 <h5>Add Product</h5>
-                <form id="addProductForm" onsubmit="addProduct(event)">
+                <form id="addProductForm" onsubmit="addProduct(event)" enctype="multipart/form-data">
                     <input class="form-control mb-2" name="name" placeholder="Product name" required>
                     <textarea class="form-control mb-2" name="description" rows="2" placeholder="Description" required></textarea>
                     <div class="row g-2">
@@ -39,8 +39,12 @@
                         <div class="col"><input class="form-control" type="number" name="quantity" placeholder="Quantity" required></div>
                         <div class="col"><input class="form-control" type="number" name="inventoryThreshold" placeholder="Threshold" value="5"></div>
                     </div>
-                    <input class="form-control mt-2" name="categoryName" placeholder="Category name" required>
-                    <input class="form-control mt-2" name="imageUrl" placeholder="Image URL">
+                    <select class="form-select mt-2" name="categoryName" required>
+                        <option value="">Select category</option>
+                        <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.name}"></option>
+                    </select>
+                    <input class="form-control mt-2" name="imageUrl" placeholder="Image URL (optional)">
+                    <input class="form-control mt-2" name="imageFile" type="file" accept="image/*">
                     <button class="btn btn-primary w-100 mt-3" type="submit">Save Product</button>
                 </form>
                 <p id="sellerMessage" class="small mt-2"></p>
@@ -48,6 +52,17 @@
         </div>
 
         <div class="col-lg-6">
+            <div class="card section-card p-3 mb-4">
+                <h5>Add Category</h5>
+                <form id="addCategoryForm" onsubmit="addCategory(event)">
+                    <input class="form-control mb-2" name="name" placeholder="Category name" required>
+                    <textarea class="form-control mb-2" name="description" rows="2" placeholder="Category description"></textarea>
+                    <input class="form-control mb-2" name="imageUrl" placeholder="Category image URL (optional)">
+                    <button class="btn btn-outline-primary w-100" type="submit">Create Category</button>
+                </form>
+                <p id="categoryMessage" class="small mt-2"></p>
+            </div>
+
             <div class="card section-card p-3">
                 <h5>Low Stock Alerts</h5>
                 <div th:if="${#lists.isEmpty(lowStock)}" class="text-muted small">No low stock products.</div>
@@ -67,6 +82,7 @@
                     <table class="table align-middle">
                         <thead>
                         <tr>
+                            <th>Image</th>
                             <th>ID</th>
                             <th>Name</th>
                             <th>Category</th>
@@ -77,6 +93,10 @@
                         </thead>
                         <tbody>
                         <tr th:each="p : ${inventory}">
+                            <td>
+                                <img th:if="${p.imageUrl != null}" th:src="${p.imageUrl}" alt="Product" width="48" height="48" class="rounded object-fit-cover">
+                                <span th:if="${p.imageUrl == null}" class="text-muted small">No image</span>
+                            </td>
                             <td th:text="${p.id}"></td>
                             <td th:text="${p.name}"></td>
                             <td th:text="${p.category.name}"></td>

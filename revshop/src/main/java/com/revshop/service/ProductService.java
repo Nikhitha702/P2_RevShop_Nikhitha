@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final CurrentUserService currentUserService;
     private final NotificationService notificationService;
+    private final FileStorageService fileStorageService;
 
     @Transactional
     public ApiResponse addProduct(ProductRequest request) {
@@ -46,6 +48,14 @@ public class ProductService {
         notifyIfLowStock(product);
 
         return new ApiResponse(true, "Product added successfully");
+    }
+
+    @Transactional
+    public ApiResponse addProductWithImage(ProductRequest request, MultipartFile imageFile) {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            request.setImageUrl(fileStorageService.storeProductImage(imageFile));
+        }
+        return addProduct(request);
     }
 
     @Transactional

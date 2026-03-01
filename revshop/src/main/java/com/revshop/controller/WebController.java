@@ -64,6 +64,7 @@ public class WebController {
 
     @GetMapping("/seller/dashboard")
     public String sellerDashboard(Model model) {
+        model.addAttribute("categories", categoryService.getAllActiveCategories());
         model.addAttribute("inventory", productService.getSellerInventory());
         model.addAttribute("lowStock", productService.getLowStockProducts());
         model.addAttribute("notifications", notificationService.getMyNotifications());

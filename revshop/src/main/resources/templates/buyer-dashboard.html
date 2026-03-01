@@ -43,12 +43,48 @@
                                 <h6 class="fw-bold" th:text="${product.name}"></h6>
                                 <p class="small text-muted" th:text="${product.category.name}"></p>
                                 <p class="small" th:text="${product.description}"></p>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="fw-bold text-primary" th:text="'INR ' + ${product.discountedPrice != null ? product.discountedPrice : product.mrp}"></span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <input class="form-control form-control-sm" th:id="|qty_${product.id}|" type="number" min="1" value="1">
+                                    <button class="btn btn-sm btn-primary" th:onclick="|addToCart(${product.id})|">Add Cart</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="card section-card p-3">
+                <h5>Cart, Checkout & Payment</h5>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6"><textarea id="shipAddress" class="form-control" rows="2" placeholder="Shipping Address"></textarea></div>
+                    <div class="col-md-6"><textarea id="billAddress" class="form-control" rows="2" placeholder="Billing Address"></textarea></div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-primary" onclick="viewCart()">View Cart</button>
+                    <button class="btn btn-outline-primary" onclick="cartTotal()">Cart Total</button>
+                    <button class="btn btn-primary" onclick="checkout()">Checkout</button>
+                    <button class="btn btn-outline-secondary" onclick="myOrders()">My Orders</button>
+                </div>
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4"><input id="payOrderId" class="form-control" type="number" placeholder="Order ID"></div>
+                    <div class="col-md-4">
+                        <select id="payMethod" class="form-select">
+                            <option>CASH_ON_DELIVERY</option>
+                            <option>CREDIT_CARD</option>
+                            <option>DEBIT_CARD</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><button class="btn btn-success w-100" onclick="payOrder()">Pay</button></div>
+                </div>
+
+                <pre id="buyerApiLog" class="bg-dark text-light p-3 rounded mt-3 small" style="min-height:120px">API responses appear here</pre>
+            </div>
         </div>
+
         <div class="col-lg-4">
             <div class="card section-card p-3">
                 <h5>Notifications</h5>

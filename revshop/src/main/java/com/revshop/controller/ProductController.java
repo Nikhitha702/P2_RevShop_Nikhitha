@@ -9,7 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +47,29 @@ public class ProductController {
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse addProduct(@Valid @RequestBody ProductRequest request) {
         return productService.addProduct(request);
+    }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('SELLER')")
+    public ApiResponse addProductWithImage(@RequestParam String name,
+                                           @RequestParam String description,
+                                           @RequestParam java.math.BigDecimal mrp,
+                                           @RequestParam(required = false) java.math.BigDecimal discountedPrice,
+                                           @RequestParam Integer quantity,
+                                           @RequestParam(required = false) Integer inventoryThreshold,
+                                           @RequestParam String categoryName,
+                                           @RequestParam(required = false) String imageUrl,
+                                           @RequestParam(required = false) MultipartFile imageFile) {
+        ProductRequest request = new ProductRequest();
+        request.setName(name);
+        request.setDescription(description);
+        request.setMrp(mrp);
+        request.setDiscountedPrice(discountedPrice);
+        request.setQuantity(quantity);
+        request.setInventoryThreshold(inventoryThreshold);
+        request.setCategoryName(categoryName);
+        request.setImageUrl(imageUrl);
+        return productService.addProductWithImage(request, imageFile);
     }
 
     @PutMapping("/{id}")

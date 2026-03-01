@@ -4,18 +4,45 @@ function csrfHeaders() {
     return token ? { [header]: token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 }
 
+function csrfOnlyHeaders() {
+    const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-XSRF-TOKEN';
+    return token ? { [header]: token } : {};
+}
+
 async function addProduct(event) {
     event.preventDefault();
     const form = document.getElementById('addProductForm');
+    const formData = new FormData(form);
+
+    const res = await fetch('/api/products/upload', {
+        method: 'POST',
+        headers: csrfOnlyHeaders(),
+        body: formData
+    });
+
+    const msgEl = document.getElementById('sellerMessage');
+    const body = await res.json().catch(() => ({ message: 'Request failed' }));
+    msgEl.textContent = body.message || 'Request completed';
+    msgEl.className = res.ok ? 'small mt-2 text-success' : 'small mt-2 text-danger';
+
+    if (res.ok) {
+        setTimeout(() => window.location.reload(), 600);
+    }
+}
+
+async function addCategory(event) {
+    event.preventDefault();
+    const form = document.getElementById('addCategoryForm');
     const payload = Object.fromEntries(new FormData(form).entries());
 
-    const res = await fetch('/api/products', {
+    const res = await fetch('/api/categories', {
         method: 'POST',
         headers: csrfHeaders(),
         body: JSON.stringify(payload)
     });
 
-    const msgEl = document.getElementById('sellerMessage');
+    const msgEl = document.getElementById('categoryMessage');
     const body = await res.json().catch(() => ({ message: 'Request failed' }));
     msgEl.textContent = body.message || 'Request completed';
     msgEl.className = res.ok ? 'small mt-2 text-success' : 'small mt-2 text-danger';
