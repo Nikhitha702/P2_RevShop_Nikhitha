@@ -12,32 +12,39 @@ async function registerUser(event, formId, endpoint, messageId) {
         headers[csrfHeader] = csrfToken;
     }
 
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-    });
-
     const msgEl = document.getElementById(messageId);
-    const contentType = res.headers.get('content-type') || '';
-
     let message = 'Request failed';
     let success = false;
 
-    if (contentType.includes('application/json')) {
-        const body = await res.json();
-        success = !!body.success && res.ok;
-        message = body.message || message;
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+        });
 
-        if (body.details) {
-            const details = Object.entries(body.details)
-                .map(([k, v]) => `${k}: ${v}`)
-                .join(', ');
-            message = `${message}. ${details}`;
+        if (res.redirected && res.url.includes('/login')) {
+            throw new Error('Session expired. Please refresh and try again.');
         }
-    } else {
-        const text = await res.text();
-        message = text ? text.substring(0, 200) : message;
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const body = await res.json();
+            success = !!body.success && res.ok;
+            message = body.message || message;
+
+            if (body.details) {
+                const details = Object.entries(body.details)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(', ');
+                message = `${message}. ${details}`;
+            }
+        } else {
+            const text = await res.text();
+            message = text ? text.substring(0, 200) : 'Unexpected response from server';
+        }
+    } catch (err) {
+        message = err.message || 'Unable to reach server';
     }
 
     msgEl.textContent = message;
