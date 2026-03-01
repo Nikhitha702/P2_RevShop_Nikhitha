@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByActiveTrue(Pageable pageable);
+    List<Product> findByActiveTrueOrderByCreatedAtDesc();
     Page<Product> findByActiveTrueAndNameContainingIgnoreCase(String keyword, Pageable pageable);
     Page<Product> findByActiveTrueAndCategoryNameIgnoreCase(String categoryName, Pageable pageable);
     List<Product> findBySeller(User seller);

@@ -3,6 +3,7 @@ let buyerCategory = 'all';
 const logEl = document.getElementById('buyerApiLog');
 const categoryWrap = document.getElementById('buyerCategories');
 const productGrid = document.getElementById('buyerProductGrid');
+let buyerAllProducts = [];
 
 if (buyerSearch) {
     buyerSearch.addEventListener('input', loadProducts);
@@ -115,18 +116,19 @@ async function loadCategories() {
 }
 
 async function loadProducts() {
-    const keyword = (buyerSearch?.value || '').trim();
-    let url = '/api/products?page=0&size=24';
-
-    if (buyerCategory !== 'all') {
-        url = `/api/products/category/${encodeURIComponent(buyerCategory)}?page=0&size=24`;
-    } else if (keyword) {
-        url = `/api/products/search?keyword=${encodeURIComponent(keyword)}&page=0&size=24`;
+    if (buyerAllProducts.length === 0) {
+        const res = await fetch('/api/products/all');
+        buyerAllProducts = await res.json().catch(() => []);
     }
 
-    const res = await fetch(url);
-    const body = await res.json().catch(() => ({ content: [] }));
-    renderProducts(body.content || []);
+    const keyword = (buyerSearch?.value || '').trim().toLowerCase();
+    const filtered = buyerAllProducts.filter((p) => {
+        const matchesCategory = buyerCategory === 'all' || (p.category?.name || '').toLowerCase() === buyerCategory;
+        const matchesSearch = !keyword || (p.name || '').toLowerCase().includes(keyword);
+        return matchesCategory && matchesSearch;
+    });
+
+    renderProducts(filtered);
 }
 
 async function addToCart(productId) {
@@ -172,5 +174,6 @@ async function markNotification(id) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadCategories();
+    buyerAllProducts = [];
     await loadProducts();
 });
