@@ -3,42 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>RevShop</title>
+    <title>RevShop - Marketplace</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+<nav class="navbar navbar-expand-lg top-nav sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="/">RevShop</a>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-primary" href="/login">Login</a>
-            <a class="btn btn-primary" href="/register/buyer">Buyer Signup</a>
-            <a class="btn btn-warning" href="/register/seller">Seller Signup</a>
+        <a class="navbar-brand fw-bold" href="/">RevShop</a>
+        <div class="ms-auto d-flex gap-2">
+            <a class="btn btn-sm btn-warning" href="/register/seller">Become Seller</a>
+            <a class="btn btn-sm btn-light" href="/register/buyer">Buyer Signup</a>
+            <a class="btn btn-sm btn-outline-light" href="/login">Login</a>
         </div>
     </div>
 </nav>
 
-<main class="hero-wrap">
-    <div class="container py-5">
-        <div class="row align-items-center g-4">
+<div class="container py-4">
+    <section class="hero-banner p-4 mb-4">
+        <div class="row align-items-center g-3">
             <div class="col-lg-7">
-                <h1 class="display-5 fw-bold">Flipkart-level foundation for RevShop</h1>
-                <p class="lead text-muted">Clean rebuild started. Next branches will add products, categories, cart, orders, payment, notifications, and a richer storefront.</p>
+                <h2 class="fw-bold mb-2">Real Ecommerce Experience for Buyers and Sellers</h2>
+                <p class="text-muted mb-0">Search by product name, filter by category, and explore live catalog with images and discounts.</p>
             </div>
             <div class="col-lg-5">
-                <div class="card shadow-sm border-0 p-4">
-                    <h4 class="mb-3">Current Milestone</h4>
-                    <ul class="mb-0">
-                        <li>Buyer/Seller registration</li>
-                        <li>Session login/logout</li>
-                        <li>Role-based dashboard routing</li>
-                        <li>Oracle-ready persistence</li>
-                    </ul>
+                <input id="searchInput" class="form-control form-control-lg" placeholder="Search products...">
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-4 d-flex flex-wrap gap-2" id="categoryStrip">
+        <button class="category-chip" onclick="filterByCategory('all')">All</button>
+        <button class="category-chip" th:each="cat : ${categories}" th:text="${cat.name}" th:onclick="|filterByCategory('${cat.name}')|"></button>
+    </section>
+
+    <section class="row g-3" id="productGrid">
+        <div class="col-md-6 col-lg-3" th:each="product : ${products}" th:attr="data-name=${product.name},data-category=${product.category.name}">
+            <div class="card product-card h-100">
+                <img class="product-image" th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl)} ? ${product.imageUrl} : 'https://dummyimage.com/600x400/f0f2f8/7d8ca6&text=RevShop'" alt="Product image">
+                <div class="card-body">
+                    <h6 class="fw-bold" th:text="${product.name}">Product</h6>
+                    <p class="text-muted small mb-2" th:text="${product.category.name}">Category</p>
+                    <p class="small mb-2" th:text="${product.description}">Description</p>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-primary" th:text="|? ${product.discountedPrice != null ? product.discountedPrice : product.mrp}|">? 0</span>
+                        <small class="text-decoration-line-through text-muted" th:if="${product.discountedPrice != null}" th:text="|? ${product.mrp}|">? 0</small>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </section>
+</div>
+
+<script th:src="@{/js/storefront.js}"></script>
 </body>
 </html>
