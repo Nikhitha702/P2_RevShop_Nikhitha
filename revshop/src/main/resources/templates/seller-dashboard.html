@@ -39,9 +39,8 @@
                         <div class="col"><input class="form-control" type="number" name="quantity" placeholder="Quantity" required></div>
                         <div class="col"><input class="form-control" type="number" name="inventoryThreshold" placeholder="Threshold" value="5"></div>
                     </div>
-                    <select class="form-select mt-2" name="categoryName" required>
+                    <select class="form-select mt-2" id="categorySelect" name="categoryName" required>
                         <option value="">Select category</option>
-                        <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.name}"></option>
                     </select>
                     <input class="form-control mt-2" name="imageUrl" placeholder="Image URL (optional)">
                     <input class="form-control mt-2" name="imageFile" type="file" accept="image/*">

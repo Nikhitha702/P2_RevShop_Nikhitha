@@ -10,6 +10,22 @@ function csrfOnlyHeaders() {
     return token ? { [header]: token } : {};
 }
 
+async function loadCategories() {
+    const select = document.getElementById('categorySelect');
+    if (!select) return;
+
+    const res = await fetch('/api/categories');
+    const categories = await res.json().catch(() => []);
+
+    select.innerHTML = '<option value="">Select category</option>';
+    categories.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+    });
+}
+
 async function addProduct(event) {
     event.preventDefault();
     const form = document.getElementById('addProductForm');
@@ -27,6 +43,8 @@ async function addProduct(event) {
     msgEl.className = res.ok ? 'small mt-2 text-success' : 'small mt-2 text-danger';
 
     if (res.ok) {
+        form.reset();
+        await loadCategories();
         setTimeout(() => window.location.reload(), 600);
     }
 }
@@ -48,7 +66,9 @@ async function addCategory(event) {
     msgEl.className = res.ok ? 'small mt-2 text-success' : 'small mt-2 text-danger';
 
     if (res.ok) {
-        setTimeout(() => window.location.reload(), 600);
+        form.reset();
+        await loadCategories();
+        setTimeout(() => window.location.reload(), 400);
     }
 }
 
@@ -88,3 +108,5 @@ async function deleteProduct(id) {
         window.location.reload();
     }
 }
+
+document.addEventListener('DOMContentLoaded', loadCategories);
