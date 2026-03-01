@@ -5,11 +5,20 @@ import com.revshop.dto.ProductRequest;
 import com.revshop.dto.ProductUpdateRequest;
 import com.revshop.entity.Product;
 import com.revshop.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -22,13 +31,13 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('SELLER')")
-    public ApiResponse addProduct(@RequestBody ProductRequest request) {
+    public ApiResponse addProduct(@Valid @RequestBody ProductRequest request) {
         return productService.addProduct(request);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SELLER')")
-    public ApiResponse updateProduct(@PathVariable Long id, @RequestBody ProductUpdateRequest request) {
+    public ApiResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request) {
         return productService.updateProduct(id, request);
     }
 
