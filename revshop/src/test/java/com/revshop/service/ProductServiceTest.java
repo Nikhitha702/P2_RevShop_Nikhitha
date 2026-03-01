@@ -30,6 +30,9 @@ class ProductServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ProductService productService;
 

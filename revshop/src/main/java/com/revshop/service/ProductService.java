@@ -23,6 +23,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final CurrentUserService currentUserService;
+    private final NotificationService notificationService;
 
     @Transactional
     public ApiResponse addProduct(ProductRequest request) {
@@ -42,6 +43,7 @@ public class ProductService {
         product.setSeller(seller);
         product.setActive(true);
         productRepository.save(product);
+        notifyIfLowStock(product);
 
         return new ApiResponse(true, "Product added successfully");
     }
@@ -65,6 +67,7 @@ public class ProductService {
         if (request.getImageUrl() != null) product.setImageUrl(request.getImageUrl());
 
         productRepository.save(product);
+        notifyIfLowStock(product);
         return new ApiResponse(true, "Product updated successfully");
     }
 
@@ -112,5 +115,12 @@ public class ProductService {
         return getSellerInventory().stream()
                 .filter(p -> p.getQuantity() <= p.getInventoryThreshold())
                 .toList();
+    }
+
+    private void notifyIfLowStock(Product product) {
+        if (product.getQuantity() <= product.getInventoryThreshold()) {
+            String message = "Low stock alert: " + product.getName() + " has only " + product.getQuantity() + " units left.";
+            notificationService.createNotification(product.getSeller(), message);
+        }
     }
 }
