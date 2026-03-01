@@ -14,6 +14,7 @@
             <a class="btn btn-secondary" href="/dashboard/buyer">Buyer Workbench</a>
             <a class="btn btn-secondary" href="/dashboard/seller">Seller Workbench</a>
             <form action="/logout" method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button class="btn btn-danger" type="submit">Logout</button>
             </form>
         </div>
