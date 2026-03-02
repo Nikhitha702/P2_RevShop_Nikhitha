@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>Checkout - RevShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div id="toastContainer" class="toast-container-custom"></div>
+<nav class="navbar navbar-expand-lg top-nav sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/buyer/dashboard">
+            <i class="bi bi-bag-heart-fill"></i>
+            <span>RevShop Buyer</span>
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a class="btn btn-sm btn-light" href="/buyer/dashboard"><i class="bi bi-grid me-1"></i>Dashboard</a>
+            <a class="btn btn-sm btn-outline-light" href="/buyer/cart"><i class="bi bi-cart3 me-1"></i>Cart</a>
+            <a class="btn btn-sm btn-outline-light" href="/buyer/payment"><i class="bi bi-credit-card me-1"></i>Payment</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card section-card p-3">
+        <h4 class="mb-3"><i class="bi bi-box-seam me-2"></i>Checkout</h4>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="shipAddress" class="form-label"><i class="bi bi-truck me-1"></i>Shipping Address</label>
+                <textarea id="shipAddress" class="form-control" rows="4" placeholder="Enter shipping address"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label for="billAddress" class="form-label"><i class="bi bi-wallet2 me-1"></i>Billing Address</label>
+                <textarea id="billAddress" class="form-control" rows="4" placeholder="Enter billing address"></textarea>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <a class="btn btn-outline-secondary" href="/buyer/cart"><i class="bi bi-arrow-left me-1"></i>Back to Cart</a>
+            <button class="btn btn-primary" onclick="checkoutOrder()"><i class="bi bi-bag-check me-1"></i>Place Order</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/buyer-common.js}"></script>
+<script th:src="@{/js/buyer-checkout-page.js}"></script>
+</body>
+</html>

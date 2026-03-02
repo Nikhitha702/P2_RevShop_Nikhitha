@@ -34,6 +34,11 @@ public class WebController {
         return "index";
     }
 
+    @GetMapping("/home")
+    public String homeAlias() {
+        return "redirect:/";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -75,6 +80,39 @@ public class WebController {
             model.addAttribute("notifications", java.util.List.of());
         }
         return "buyer-dashboard";
+    }
+
+    @GetMapping("/buyer/cart")
+    public String buyerCart(Model model) {
+        try {
+            model.addAttribute("notifications", notificationService.getMyNotifications());
+        } catch (Exception ex) {
+            log.error("Failed to load buyer cart page", ex);
+            model.addAttribute("notifications", java.util.List.of());
+        }
+        return "buyer-cart";
+    }
+
+    @GetMapping("/buyer/checkout")
+    public String buyerCheckout(Model model) {
+        try {
+            model.addAttribute("notifications", notificationService.getMyNotifications());
+        } catch (Exception ex) {
+            log.error("Failed to load buyer checkout page", ex);
+            model.addAttribute("notifications", java.util.List.of());
+        }
+        return "buyer-checkout";
+    }
+
+    @GetMapping("/buyer/payment")
+    public String buyerPayment(Model model) {
+        try {
+            model.addAttribute("notifications", notificationService.getMyNotifications());
+        } catch (Exception ex) {
+            log.error("Failed to load buyer payment page", ex);
+            model.addAttribute("notifications", java.util.List.of());
+        }
+        return "buyer-payment";
     }
 
     @GetMapping("/seller/dashboard")

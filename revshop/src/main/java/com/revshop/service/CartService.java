@@ -35,16 +35,17 @@ public class CartService {
             throw new IllegalArgumentException("Product is not available");
         }
 
-        if (product.getQuantity() < quantity) {
-            throw new IllegalArgumentException("Requested quantity not in stock");
-        }
-
         CartItem item = cartItemRepository.findByBuyerAndProductId(buyer, productId)
                 .orElseGet(CartItem::new);
 
+        int updatedQuantity = (item.getQuantity() == null ? 0 : item.getQuantity()) + quantity;
+        if (product.getQuantity() < updatedQuantity) {
+            throw new IllegalArgumentException("Requested quantity not in stock");
+        }
+
         item.setBuyer(buyer);
         item.setProduct(product);
-        item.setQuantity((item.getQuantity() == null ? 0 : item.getQuantity()) + quantity);
+        item.setQuantity(updatedQuantity);
         cartItemRepository.save(item);
 
         return new ApiResponse(true, "Product added to cart");
@@ -66,6 +67,15 @@ public class CartService {
 
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
+        Product product = item.getProduct();
+        if (!product.isActive()) {
+            throw new IllegalArgumentException("Product is not available");
+        }
+
+        if (quantity > product.getQuantity()) {
+            throw new IllegalArgumentException("Requested quantity not in stock");
         }
 
         item.setQuantity(quantity);

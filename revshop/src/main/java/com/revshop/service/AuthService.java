@@ -3,8 +3,8 @@ package com.revshop.service;
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.SellerRegisterRequest;
-import com.revshop.entity.Role;
 import com.revshop.entity.User;
+import com.revshop.mapper.UserMapper;
 import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +24,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email is already registered");
         }
 
-        User buyer = mapCommonFields(request);
-        buyer.setRole(Role.ROLE_BUYER);
+        User buyer = UserMapper.toBuyer(request, passwordEncoder.encode(request.getPassword()));
         userRepository.save(buyer);
 
         return new ApiResponse(true, "Buyer account created successfully");
@@ -37,25 +36,10 @@ public class AuthService {
             throw new IllegalArgumentException("Email is already registered");
         }
 
-        User seller = mapCommonFields(request);
-        seller.setRole(Role.ROLE_SELLER);
-        seller.setBusinessName(request.getBusinessName());
-        seller.setGstNumber(request.getGstNumber());
-        seller.setBusinessCategory(request.getBusinessCategory());
+        User seller = UserMapper.toSeller(request, passwordEncoder.encode(request.getPassword()));
         userRepository.save(seller);
 
         return new ApiResponse(true, "Seller account created successfully");
     }
 
-    private User mapCommonFields(BuyerRegisterRequest request) {
-        User user = new User();
-        user.setFirstName(request.getFirstName().trim());
-        user.setLastName(request.getLastName().trim());
-        user.setEmail(request.getEmail().trim().toLowerCase());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setPhone(request.getPhone().trim());
-        user.setAddress(request.getAddress().trim());
-        user.setEnabled(true);
-        return user;
-    }
 }

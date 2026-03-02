@@ -6,6 +6,7 @@ import com.revshop.dto.ProductUpdateRequest;
 import com.revshop.entity.Category;
 import com.revshop.entity.Product;
 import com.revshop.entity.User;
+import com.revshop.mapper.ProductMapper;
 import com.revshop.repository.CategoryRepository;
 import com.revshop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,17 +34,7 @@ public class ProductService {
         Category category = categoryRepository.findByNameIgnoreCase(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
-        Product product = new Product();
-        product.setName(request.getName().trim());
-        product.setDescription(request.getDescription().trim());
-        product.setMrp(request.getMrp());
-        product.setDiscountedPrice(request.getDiscountedPrice());
-        product.setQuantity(request.getQuantity());
-        product.setInventoryThreshold(request.getInventoryThreshold() == null ? 5 : request.getInventoryThreshold());
-        product.setImageUrl(request.getImageUrl());
-        product.setCategory(category);
-        product.setSeller(seller);
-        product.setActive(true);
+        Product product = ProductMapper.toNewEntity(request, category, seller);
         productRepository.save(product);
         notifyIfLowStock(product);
 
@@ -68,13 +59,7 @@ public class ProductService {
             throw new IllegalArgumentException("You can update only your products");
         }
 
-        if (request.getName() != null && !request.getName().isBlank()) product.setName(request.getName().trim());
-        if (request.getDescription() != null && !request.getDescription().isBlank()) product.setDescription(request.getDescription().trim());
-        if (request.getMrp() != null) product.setMrp(request.getMrp());
-        if (request.getDiscountedPrice() != null) product.setDiscountedPrice(request.getDiscountedPrice());
-        if (request.getQuantity() != null) product.setQuantity(request.getQuantity());
-        if (request.getInventoryThreshold() != null) product.setInventoryThreshold(request.getInventoryThreshold());
-        if (request.getImageUrl() != null) product.setImageUrl(request.getImageUrl());
+        ProductMapper.applyUpdate(product, request);
 
         productRepository.save(product);
         notifyIfLowStock(product);

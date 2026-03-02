@@ -17,7 +17,7 @@ public class FileStorageService {
     private final Path uploadRoot;
 
     public FileStorageService(@Value("${app.upload.dir:uploads}") String uploadDir) {
-        this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+        this.uploadRoot = resolveUploadRoot(uploadDir);
     }
 
     public String storeProductImage(MultipartFile file) {
@@ -44,5 +44,28 @@ public class FileStorageService {
             return "";
         }
         return fileName.substring(dotIndex);
+    }
+
+    private Path resolveUploadRoot(String uploadDir) {
+        Path configured = Paths.get(uploadDir);
+        if (configured.isAbsolute()) {
+            return configured.normalize();
+        }
+
+        Path directPath = configured.toAbsolutePath().normalize();
+        Path nestedPath = Paths.get("revshop", uploadDir).toAbsolutePath().normalize();
+
+        if (Files.exists(directPath)) {
+            return directPath;
+        }
+        if (Files.exists(nestedPath)) {
+            return nestedPath;
+        }
+
+        Path nestedPom = Paths.get("revshop", "pom.xml").toAbsolutePath().normalize();
+        if (Files.exists(nestedPom)) {
+            return nestedPath;
+        }
+        return directPath;
     }
 }

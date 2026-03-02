@@ -34,16 +34,23 @@
 
     <section class="mb-4 d-flex flex-wrap gap-2" id="categoryStrip">
         <button class="category-chip" onclick="filterByCategory('all')">All</button>
-        <button class="category-chip" th:each="cat : ${categories}" th:text="${cat.name}" th:onclick="|filterByCategory('${cat.name}')|"></button>
+        <button class="category-chip"
+                th:each="cat : ${categories}"
+                th:text="${cat.name}"
+                th:attr="data-category=${cat.name}"
+                onclick="filterByCategory(this.dataset.category)"></button>
     </section>
 
     <section class="row g-3" id="productGrid">
-        <div class="col-md-6 col-lg-3" th:each="product : ${products}" th:attr="data-name=${product.name},data-category=${product.category.name}">
+        <div class="col-md-6 col-lg-3" th:each="product : ${products}" th:attr="data-name=${product.name},data-category=${product.category != null ? product.category.name : 'Uncategorized'}">
             <div class="card product-card h-100">
-                <img class="product-image" th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl)} ? ${product.imageUrl} : 'https://dummyimage.com/600x400/f0f2f8/7d8ca6&text=RevShop'" alt="Product image">
+                <img class="product-image"
+                     th:src="${product.imageUrl != null && !#strings.isEmpty(product.imageUrl)} ? ${product.imageUrl} : '/images/product-placeholder.svg'"
+                     onerror="this.onerror=null;this.src='/images/product-placeholder.svg';"
+                     alt="Product image">
                 <div class="card-body">
                     <h6 class="fw-bold" th:text="${product.name}">Product</h6>
-                    <p class="text-muted small mb-2" th:text="${product.category.name}">Category</p>
+                    <p class="text-muted small mb-2" th:text="${product.category != null ? product.category.name : 'Uncategorized'}">Category</p>
                     <p class="small mb-2" th:text="${product.description}">Description</p>
                     <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-primary" th:text="|? ${product.discountedPrice != null ? product.discountedPrice : product.mrp}|">? 0</span>

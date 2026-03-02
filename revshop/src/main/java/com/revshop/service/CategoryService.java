@@ -3,6 +3,7 @@ package com.revshop.service;
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.CategoryRequest;
 import com.revshop.entity.Category;
+import com.revshop.mapper.CategoryMapper;
 import com.revshop.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,11 +23,7 @@ public class CategoryService {
             throw new IllegalArgumentException("Category name already exists");
         }
 
-        Category category = new Category();
-        category.setName(request.getName().trim());
-        category.setDescription(request.getDescription());
-        category.setImageUrl(request.getImageUrl());
-        category.setActive(true);
+        Category category = CategoryMapper.toNewEntity(request);
         categoryRepository.save(category);
 
         return new ApiResponse(true, "Category created");
@@ -42,9 +39,7 @@ public class CategoryService {
             throw new IllegalArgumentException("Category name already exists");
         }
 
-        category.setName(request.getName().trim());
-        category.setDescription(request.getDescription());
-        category.setImageUrl(request.getImageUrl());
+        CategoryMapper.applyUpdate(category, request);
         categoryRepository.save(category);
 
         return new ApiResponse(true, "Category updated");

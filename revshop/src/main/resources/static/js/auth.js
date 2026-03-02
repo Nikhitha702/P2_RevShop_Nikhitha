@@ -51,6 +51,7 @@ async function registerUser(event, formId, endpoint, messageId) {
     msgEl.className = success ? 'mt-3 small text-success' : 'mt-3 small text-danger';
 
     if (success) {
-        setTimeout(() => window.location.href = '/login', 1200);
+        msgEl.textContent = `${message} Redirecting to login...`;
+        setTimeout(() => window.location.assign('/login'), 700);
     }
 }

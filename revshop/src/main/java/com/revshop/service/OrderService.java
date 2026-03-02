@@ -3,6 +3,7 @@ package com.revshop.service;
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.CheckoutRequest;
 import com.revshop.entity.*;
+import com.revshop.mapper.OrderMapper;
 import com.revshop.repository.CartItemRepository;
 import com.revshop.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,17 +31,15 @@ public class OrderService {
             throw new IllegalArgumentException("Cart is empty");
         }
 
-        Order order = new Order();
-        order.setBuyer(buyer);
-        order.setStatus(OrderStatus.PLACED);
-        order.setShippingAddress(request.getShippingAddress().trim());
-        order.setBillingAddress(request.getBillingAddress().trim());
-
-        List<OrderItem> orderItems = new ArrayList<>();
+        Order order = OrderMapper.toNewOrder(request, buyer);
+        List<OrderItem> orderItems = new java.util.ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem cartItem : cartItems) {
             Product product = cartItem.getProduct();
+            if (!product.isActive()) {
+                throw new IllegalArgumentException("Product is not available: " + product.getName());
+            }
             if (product.getQuantity() < cartItem.getQuantity()) {
                 throw new IllegalArgumentException("Insufficient stock for " + product.getName());
             }
@@ -51,15 +49,13 @@ public class OrderService {
             BigDecimal unitPrice = product.getDiscountedPrice() != null ? product.getDiscountedPrice() : product.getMrp();
             total = total.add(unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
 
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setProduct(product);
-            item.setSeller(product.getSeller());
-            item.setQuantity(cartItem.getQuantity());
-            item.setUnitPrice(unitPrice);
-            orderItems.add(item);
+            orderItems.add(OrderMapper.toOrderItem(order, cartItem, unitPrice));
 
             notificationService.createNotification(product.getSeller(), "New order received for product: " + product.getName());
+            if (product.getQuantity() <= product.getInventoryThreshold()) {
+                notificationService.createNotification(product.getSeller(),
+                        "Low stock alert: " + product.getName() + " has only " + product.getQuantity() + " units left.");
+            }
         }
 
         order.setItems(orderItems);
@@ -69,7 +65,7 @@ public class OrderService {
         cartItemRepository.deleteAll(cartItems);
         notificationService.createNotification(buyer, "Order placed successfully. Order ID: " + order.getId());
 
-        return new ApiResponse(true, "Order placed successfully");
+        return new ApiResponse(true, "Order placed successfully. Order ID: " + order.getId());
     }
 
     public List<Order> myOrders() {
@@ -77,7 +73,7 @@ public class OrderService {
     }
 
     public List<Order> sellerOrders() {
-        return orderRepository.findByItemsSellerOrderByCreatedAtDesc(currentUserService.getCurrentUserOrThrow());
+        return orderRepository.findDistinctByItemsSellerOrderByCreatedAtDesc(currentUserService.getCurrentUserOrThrow());
     }
 
     @Transactional
