@@ -1,6 +1,9 @@
 package com.revshop.service;
 
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ForgotPasswordRequest;
+import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.User;
 import com.revshop.repository.UserRepository;
@@ -12,10 +15,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +36,9 @@ class AuthServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private PasswordResetRateLimiter passwordResetRateLimiter;
 
     @InjectMocks
     private AuthService authService;
@@ -81,5 +94,105 @@ class AuthServiceTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         assertEquals("Shop", captor.getValue().getBusinessName());
+    }
+
+    @Test
+    void shouldGenerateForgotPasswordTokenWhenUserExists() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("a@b.com");
+        User user = new User();
+        user.setEmail("a@b.com");
+
+        when(userRepository.findByEmailIgnoreCase("a@b.com")).thenReturn(Optional.of(user));
+
+        ForgotPasswordResponse response = authService.forgotPassword(req);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        verify(passwordResetRateLimiter).validateOrThrow("a@b.com");
+        User saved = captor.getValue();
+        assertTrue(response.getToken() != null && !response.getToken().isBlank());
+        assertTrue(saved.getResetPasswordToken() != null && !saved.getResetPasswordToken().isBlank());
+        assertTrue(saved.getResetPasswordTokenExpiry() != null);
+    }
+
+    @Test
+    void shouldReplaceExistingForgotPasswordToken() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("a@b.com");
+
+        User user = new User();
+        user.setEmail("a@b.com");
+        user.setResetPasswordToken("old-token");
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(5));
+        when(userRepository.findByEmailIgnoreCase("a@b.com")).thenReturn(Optional.of(user));
+
+        authService.forgotPassword(req);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        User saved = captor.getValue();
+        assertTrue(saved.getResetPasswordToken() != null && !saved.getResetPasswordToken().isBlank());
+        assertTrue(!"old-token".equals(saved.getResetPasswordToken()));
+    }
+
+    @Test
+    void shouldResetPasswordWithValidToken() {
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setToken("valid-token");
+        req.setNewPassword("newSecret123");
+
+        User user = new User();
+        user.setResetPasswordToken("valid-token");
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(10));
+
+        when(userRepository.findByResetPasswordToken("valid-token")).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("newSecret123")).thenReturn("ENC_NEW_PASS");
+
+        authService.resetPassword(req);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        User saved = captor.getValue();
+        assertEquals("ENC_NEW_PASS", saved.getPassword());
+        assertNull(saved.getResetPasswordToken());
+        assertNull(saved.getResetPasswordTokenExpiry());
+    }
+
+    @Test
+    void shouldFailForUnknownForgotPasswordEmail() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("missing@b.com");
+        when(userRepository.findByEmailIgnoreCase("missing@b.com")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> authService.forgotPassword(req));
+        verify(passwordResetRateLimiter).validateOrThrow("missing@b.com");
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    void shouldFailResetPasswordWhenTokenExpired() {
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setToken("expired-token");
+        req.setNewPassword("newSecret123");
+
+        User user = new User();
+        user.setResetPasswordToken("expired-token");
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().minusMinutes(1));
+
+        when(userRepository.findByResetPasswordToken("expired-token")).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalArgumentException.class, () -> authService.resetPassword(req));
+    }
+
+    @Test
+    void shouldFailForgotPasswordWhenRateLimitExceeded() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("a@b.com");
+        doThrow(new IllegalArgumentException("Too many password reset requests. Please try again in 15 minutes."))
+                .when(passwordResetRateLimiter).validateOrThrow("a@b.com");
+
+        assertThrows(IllegalArgumentException.class, () -> authService.forgotPassword(req));
+        verifyNoInteractions(userRepository);
     }
 }

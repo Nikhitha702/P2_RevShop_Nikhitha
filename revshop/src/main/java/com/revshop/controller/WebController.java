@@ -44,6 +44,16 @@ public class WebController {
         return "login";
     }
 
+    @GetMapping("/forgot-password")
+    public String forgotPassword() {
+        return "forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword() {
+        return "reset-password";
+    }
+
     @GetMapping("/register/buyer")
     public String registerBuyer() {
         return "register-buyer";

@@ -2,6 +2,9 @@ package com.revshop.service;
 
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ForgotPasswordRequest;
+import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.User;
 import com.revshop.mapper.UserMapper;
@@ -11,12 +14,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetRateLimiter passwordResetRateLimiter;
 
     @Transactional
     public ApiResponse registerBuyer(BuyerRegisterRequest request) {
@@ -40,6 +47,43 @@ public class AuthService {
         userRepository.save(seller);
 
         return new ApiResponse(true, "Seller account created successfully");
+    }
+
+    @Transactional
+    public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        passwordResetRateLimiter.validateOrThrow(email);
+
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email is not registered"));
+
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(30));
+        userRepository.save(user);
+
+        return new ForgotPasswordResponse(true, "Reset token generated successfully", token);
+    }
+
+    @Transactional
+    public ApiResponse resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByResetPasswordToken(request.getToken().trim())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset token"));
+
+        if (user.getResetPasswordTokenExpiry() == null
+                || user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            user.setResetPasswordToken(null);
+            user.setResetPasswordTokenExpiry(null);
+            userRepository.save(user);
+            throw new IllegalArgumentException("Invalid or expired reset token");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        userRepository.save(user);
+
+        return new ApiResponse(true, "Password reset successful");
     }
 
 }

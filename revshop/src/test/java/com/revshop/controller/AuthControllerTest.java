@@ -2,6 +2,9 @@ package com.revshop.controller;
 
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ForgotPasswordRequest;
+import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -45,5 +48,29 @@ class AuthControllerTest {
 
         assertSame(response, actual);
         verify(authService).registerSeller(request);
+    }
+
+    @Test
+    void shouldRequestForgotPassword() {
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        ForgotPasswordResponse response = new ForgotPasswordResponse(true, "Reset requested", "token-123");
+        when(authService.forgotPassword(request)).thenReturn(response);
+
+        ForgotPasswordResponse actual = authController.forgotPassword(request);
+
+        assertSame(response, actual);
+        verify(authService).forgotPassword(request);
+    }
+
+    @Test
+    void shouldResetPassword() {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        ApiResponse response = new ApiResponse(true, "Password reset");
+        when(authService.resetPassword(request)).thenReturn(response);
+
+        ApiResponse actual = authController.resetPassword(request);
+
+        assertSame(response, actual);
+        verify(authService).resetPassword(request);
     }
 }

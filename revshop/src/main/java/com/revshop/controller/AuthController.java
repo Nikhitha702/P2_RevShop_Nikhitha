@@ -2,6 +2,9 @@ package com.revshop.controller;
 
 import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
+import com.revshop.dto.ForgotPasswordRequest;
+import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
 import jakarta.validation.Valid;
@@ -26,5 +29,15 @@ public class AuthController {
     @PostMapping("/register/seller")
     public ApiResponse registerSeller(@Valid @RequestBody SellerRegisterRequest request) {
         return authService.registerSeller(request);
+    }
+
+    @PostMapping("/forgot-password")
+    public ForgotPasswordResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return authService.forgotPassword(request);
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return authService.resetPassword(request);
     }
 }

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "app_users", uniqueConstraints = @UniqueConstraint(name = "uk_user_email", columnNames = "email"))
 @Getter
@@ -49,4 +51,12 @@ public class User {
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @Column(length = 100)
+    @JsonIgnore
+    private String resetPasswordToken;
+
+    @Column
+    @JsonIgnore
+    private LocalDateTime resetPasswordTokenExpiry;
 }
