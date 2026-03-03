@@ -5,7 +5,7 @@ RevShop is a full-stack monolithic e-commerce web application for buyers and sel
 ## Tech Stack
 - Java 21
 - Spring Boot 4.0.3
-- Spring Security (session + role-based access)
+- Spring Security (session + JWT + role-based access)
 - Spring Data JPA + Hibernate
 - Thymeleaf + Bootstrap
 - Oracle DB (runtime), H2 (tests)
@@ -57,6 +57,7 @@ mvn test
 ```
 
 ## API Highlights
+- `POST /api/auth/login` (returns JWT)
 - `POST /api/auth/register/buyer`
 - `POST /api/auth/register/seller`
 - `GET /api/products/all`

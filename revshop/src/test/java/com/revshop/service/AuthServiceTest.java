@@ -3,6 +3,8 @@ package com.revshop.service;
 import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.ForgotPasswordRequest;
 import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.LoginRequest;
+import com.revshop.dto.LoginResponse;
 import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.User;
@@ -13,9 +15,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +47,14 @@ class AuthServiceTest {
 
     @Mock
     private PasswordResetRateLimiter passwordResetRateLimiter;
+    @Mock
+    private PasswordResetDeliveryService passwordResetDeliveryService;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    @Mock
+    private CustomUserDetailsService customUserDetailsService;
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private AuthService authService;
@@ -110,8 +126,9 @@ class AuthServiceTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(captor.capture());
         verify(passwordResetRateLimiter).validateOrThrow("a@b.com");
+        verify(passwordResetDeliveryService).sendResetInstructions(any(User.class), any(String.class));
         User saved = captor.getValue();
-        assertTrue(response.getToken() != null && !response.getToken().isBlank());
+        assertTrue(response.isSuccess());
         assertTrue(saved.getResetPasswordToken() != null && !saved.getResetPasswordToken().isBlank());
         assertTrue(saved.getResetPasswordTokenExpiry() != null);
     }
@@ -194,5 +211,41 @@ class AuthServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> authService.forgotPassword(req));
         verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void shouldLoginAndReturnJwtToken() {
+        LoginRequest req = new LoginRequest();
+        req.setEmail("buyer@revshop.com");
+        req.setPassword("secret123");
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername("buyer@revshop.com")
+                .password("ENC_PASS")
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_BUYER")))
+                .build();
+
+        when(customUserDetailsService.loadUserByUsername("buyer@revshop.com")).thenReturn(userDetails);
+        when(jwtService.generateToken(userDetails)).thenReturn("jwt-token");
+        when(jwtService.getJwtExpirationSeconds()).thenReturn(3600L);
+
+        LoginResponse response = authService.login(req);
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        assertTrue(response.isSuccess());
+        assertEquals("jwt-token", response.getToken());
+        assertEquals("ROLE_BUYER", response.getRole());
+    }
+
+    @Test
+    void shouldFailLoginForInvalidCredentials() {
+        LoginRequest req = new LoginRequest();
+        req.setEmail("buyer@revshop.com");
+        req.setPassword("wrong");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Bad credentials"));
+
+        assertThrows(IllegalArgumentException.class, () -> authService.login(req));
     }
 }

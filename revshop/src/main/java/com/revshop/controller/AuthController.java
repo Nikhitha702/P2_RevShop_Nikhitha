@@ -4,6 +4,8 @@ import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.ForgotPasswordRequest;
 import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.LoginRequest;
+import com.revshop.dto.LoginResponse;
 import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
@@ -39,5 +41,10 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ApiResponse resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         return authService.resetPassword(request);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }

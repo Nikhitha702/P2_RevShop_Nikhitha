@@ -4,6 +4,8 @@ import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.ForgotPasswordRequest;
 import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.LoginRequest;
+import com.revshop.dto.LoginResponse;
 import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.service.AuthService;
@@ -53,7 +55,7 @@ class AuthControllerTest {
     @Test
     void shouldRequestForgotPassword() {
         ForgotPasswordRequest request = new ForgotPasswordRequest();
-        ForgotPasswordResponse response = new ForgotPasswordResponse(true, "Reset requested", "token-123");
+        ForgotPasswordResponse response = new ForgotPasswordResponse(true, "Reset requested");
         when(authService.forgotPassword(request)).thenReturn(response);
 
         ForgotPasswordResponse actual = authController.forgotPassword(request);
@@ -72,5 +74,17 @@ class AuthControllerTest {
 
         assertSame(response, actual);
         verify(authService).resetPassword(request);
+    }
+
+    @Test
+    void shouldLogin() {
+        LoginRequest request = new LoginRequest();
+        LoginResponse response = new LoginResponse(true, "Login successful", "jwt-token", "Bearer", 3600L, "ROLE_BUYER");
+        when(authService.login(request)).thenReturn(response);
+
+        LoginResponse actual = authController.login(request);
+
+        assertSame(response, actual);
+        verify(authService).login(request);
     }
 }

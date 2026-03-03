@@ -10,6 +10,7 @@ const reviewSelectedNameEl = document.getElementById('reviewSelectedName');
 const reviewSummaryTextEl = document.getElementById('reviewSummaryText');
 const reviewListEl = document.getElementById('reviewList');
 let buyerAllProducts = [];
+const PRODUCT_PLACEHOLDER = '/images/product-placeholder.svg';
 
 if (buyerSearch) {
     buyerSearch.addEventListener('input', loadProducts);
@@ -47,6 +48,47 @@ function payloadMessage(data, ok) {
         return data;
     }
     return ok ? 'Action completed successfully' : 'Request failed';
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
+function safeInt(value, fallback = 0) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function safeNumber(value, fallback = 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function safeImageUrl(url) {
+    if (typeof url !== 'string' || url.trim() === '') {
+        return PRODUCT_PLACEHOLDER;
+    }
+
+    const candidate = url.trim();
+    if (candidate.startsWith('/')) {
+        return candidate;
+    }
+
+    try {
+        const parsed = new URL(candidate, window.location.origin);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.href;
+        }
+    } catch (_) {
+        return PRODUCT_PLACEHOLDER;
+    }
+
+    return PRODUCT_PLACEHOLDER;
 }
 
 function csrfHeaders(includeJson = true) {
@@ -108,16 +150,16 @@ function renderProducts(products) {
     }
 
     products.forEach((product) => {
-        const price = product.discountedPrice ?? product.mrp;
-        const image = product.imageUrl && product.imageUrl.trim() !== ''
-            ? product.imageUrl
-            : '/images/product-placeholder.svg';
+        const productId = safeInt(product.id, 0);
+        const price = safeNumber(product.discountedPrice ?? product.mrp, 0);
+        const quantity = safeInt(product.quantity, 0);
+        const image = escapeHtml(safeImageUrl(product.imageUrl));
 
         const col = document.createElement('div');
         col.className = 'col-md-6';
         col.innerHTML = `
             <div class="card product-card h-100">
-                <img class="product-image" src="${image}" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" alt="Product image">
+                <img class="product-image" src="${image}" onerror="this.onerror=null;this.src='${PRODUCT_PLACEHOLDER}';" alt="Product image">
                 <div class="card-body">
                     <h6 class="fw-bold"></h6>
                     <p class="small text-muted mb-1"></p>
@@ -125,9 +167,9 @@ function renderProducts(products) {
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <span class="fw-bold text-primary">INR ${price}</span>
                     </div>
-                    <div class="small text-muted mb-2">Available: ${product.quantity ?? 0}</div>
+                    <div class="small text-muted mb-2">Available: ${quantity}</div>
                     <div class="d-flex gap-2">
-                        <input class="form-control form-control-sm" id="qty_${product.id}" type="number" min="1" value="1">
+                        <input class="form-control form-control-sm" id="qty_${productId}" type="number" min="1" value="1">
                         <button class="btn btn-sm btn-primary icon-only-btn" type="button" title="Add to Cart"><i class="bi bi-cart-plus"></i></button>
                     </div>
                     <div class="d-flex gap-2 mt-2">
@@ -145,9 +187,9 @@ function renderProducts(products) {
         title.textContent = product.name || '';
         category.textContent = product.category?.name || '';
         description.textContent = product.description || '';
-        addBtn.onclick = () => addToCart(product.id);
-        favBtn.onclick = () => addToFavorites(product.id);
-        reviewsBtn.onclick = () => viewReviews(product.id, product.name);
+        addBtn.onclick = () => addToCart(productId);
+        favBtn.onclick = () => addToFavorites(productId);
+        reviewsBtn.onclick = () => viewReviews(productId, product.name);
         productGrid.appendChild(col);
     });
 }
@@ -196,13 +238,13 @@ async function viewCart() {
 
     cartListEl.innerHTML = res.data.map((item) => `
         <div class="panel-card mb-2">
-            <div class="fw-semibold"><i class="bi bi-bag me-1"></i>${item.product?.name || 'Product'}</div>
-            <div class="small"><i class="bi bi-cash-coin me-1"></i>INR ${item.product?.discountedPrice ?? item.product?.mrp ?? 0}</div>
-            <div class="small mb-2"><i class="bi bi-123 me-1"></i>${item.quantity}</div>
+            <div class="fw-semibold"><i class="bi bi-bag me-1"></i>${escapeHtml(item.product?.name || 'Product')}</div>
+            <div class="small"><i class="bi bi-cash-coin me-1"></i>INR ${safeNumber(item.product?.discountedPrice ?? item.product?.mrp, 0)}</div>
+            <div class="small mb-2"><i class="bi bi-123 me-1"></i>${safeInt(item.quantity, 1)}</div>
             <div class="d-flex gap-2">
-                <input id="cart_qty_${item.id}" type="number" min="1" value="${item.quantity}" class="form-control form-control-sm" style="max-width:140px;">
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCartItem(${item.id})" title="Update"><i class="bi bi-arrow-repeat"></i></button>
-                <button class="btn btn-sm btn-outline-danger" onclick="removeCartItem(${item.id})" title="Remove"><i class="bi bi-trash3"></i></button>
+                <input id="cart_qty_${safeInt(item.id, 0)}" type="number" min="1" value="${safeInt(item.quantity, 1)}" class="form-control form-control-sm" style="max-width:140px;">
+                <button class="btn btn-sm btn-outline-primary" onclick="updateCartItem(${safeInt(item.id, 0)})" title="Update"><i class="bi bi-arrow-repeat"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="removeCartItem(${safeInt(item.id, 0)})" title="Remove"><i class="bi bi-trash3"></i></button>
             </div>
         </div>
     `).join('');
@@ -233,12 +275,14 @@ async function myOrders() {
     }
 
     orderListEl.innerHTML = res.data.map((order) => {
-        const items = (order.items || []).map((i) => `${i.product?.name || 'Product'} x ${i.quantity}`).join(', ');
+        const items = (order.items || [])
+            .map((i) => `${escapeHtml(i.product?.name || 'Product')} x ${safeInt(i.quantity, 0)}`)
+            .join(', ');
         return `
             <div class="panel-card mb-2">
-                <div class="fw-semibold"><i class="bi bi-box-seam me-1"></i>Order #${order.id}</div>
-                <div class="small"><i class="bi bi-flag me-1"></i>${order.status}</div>
-                <div class="small"><i class="bi bi-cash-stack me-1"></i>INR ${order.totalAmount}</div>
+                <div class="fw-semibold"><i class="bi bi-box-seam me-1"></i>Order #${safeInt(order.id, 0)}</div>
+                <div class="small"><i class="bi bi-flag me-1"></i>${escapeHtml(order.status || 'NA')}</div>
+                <div class="small"><i class="bi bi-cash-stack me-1"></i>INR ${safeNumber(order.totalAmount, 0)}</div>
                 <div class="small"><i class="bi bi-list-check me-1"></i>${items || 'N/A'}</div>
             </div>
         `;
@@ -269,10 +313,10 @@ async function viewFavorites() {
     favoriteListEl.innerHTML = res.data.map((f) => `
         <div class="panel-card mb-2 d-flex justify-content-between align-items-center">
             <div>
-                <div class="fw-semibold"><i class="bi bi-heart-fill text-danger me-1"></i>${f.product?.name || 'Product'}</div>
-                <div class="small"><i class="bi bi-upc-scan me-1"></i>${f.product?.id || '-'}</div>
+                <div class="fw-semibold"><i class="bi bi-heart-fill text-danger me-1"></i>${escapeHtml(f.product?.name || 'Product')}</div>
+                <div class="small"><i class="bi bi-upc-scan me-1"></i>${safeInt(f.product?.id, 0) || '-'}</div>
             </div>
-            <button class="btn btn-sm btn-outline-danger" onclick="removeFavoriteById(${f.product?.id || 0})" title="Remove Favorite"><i class="bi bi-heartbreak"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="removeFavoriteById(${safeInt(f.product?.id, 0)})" title="Remove Favorite"><i class="bi bi-heartbreak"></i></button>
         </div>
     `).join('');
 }
@@ -327,9 +371,9 @@ async function viewReviews(productId, productName = null) {
         } else {
             reviewListEl.innerHTML = reviews.slice(0, 5).map((r) => `
                 <div class="panel-card mb-2">
-                    <div class="fw-semibold"><i class="bi bi-star-fill text-warning me-1"></i>${r.rating}/5</div>
-                    <div class="small">${r.reviewText || ''}</div>
-                    <div class="small text-muted">By ${r.buyer?.firstName || 'Buyer'} ${r.buyer?.lastName || ''}</div>
+                    <div class="fw-semibold"><i class="bi bi-star-fill text-warning me-1"></i>${safeInt(r.rating, 0)}/5</div>
+                    <div class="small">${escapeHtml(r.reviewText || '')}</div>
+                    <div class="small text-muted">By ${escapeHtml(r.buyer?.firstName || 'Buyer')} ${escapeHtml(r.buyer?.lastName || '')}</div>
                 </div>
             `).join('');
         }

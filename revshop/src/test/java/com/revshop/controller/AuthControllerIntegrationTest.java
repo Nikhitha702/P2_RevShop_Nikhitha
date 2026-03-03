@@ -50,8 +50,7 @@ class AuthControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"buyer1@revshop.com\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.success").value(true));
 
         User saved = userRepository.findByEmailIgnoreCase("buyer1@revshop.com").orElseThrow();
         assertNotNull(saved.getResetPasswordToken());
@@ -100,8 +99,7 @@ class AuthControllerIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"email\":\"ratelimit@revshop.com\"}"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.token").isNotEmpty());
+                    .andExpect(jsonPath("$.success").value(true));
         }
 
         mockMvc.perform(post("/api/auth/forgot-password")
@@ -110,6 +108,21 @@ class AuthControllerIntegrationTest {
                         .content("{\"email\":\"ratelimit@revshop.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void loginShouldReturnJwtTokenForValidCredentials() throws Exception {
+        User user = createUser("jwtbuyer@revshop.com", "secret123");
+        userRepository.save(user);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"jwtbuyer@revshop.com\",\"password\":\"secret123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.role").value("ROLE_BUYER"));
     }
 
     private User createUser(String email, String rawPassword) {

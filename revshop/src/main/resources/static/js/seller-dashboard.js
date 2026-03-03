@@ -10,6 +10,20 @@ function csrfOnlyHeaders() {
     return token ? { [header]: token } : {};
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
+function safeInt(value, fallback = 0) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 async function sellerApi(url, method = 'GET', body = null) {
     const headers = body === null ? csrfOnlyHeaders() : csrfHeaders();
     const options = { method, headers };
@@ -138,9 +152,9 @@ async function loadSellerReviews() {
 
     target.innerHTML = reviews.map((r) => `
         <div class="list-group-item px-0">
-            <div class="fw-semibold">${r.product?.name || 'Product'} - ${r.rating}/5</div>
-            <div class="small">${r.reviewText || ''}</div>
-            <small class="text-muted">By ${r.buyer?.firstName || 'Buyer'} ${r.buyer?.lastName || ''}</small>
+            <div class="fw-semibold">${escapeHtml(r.product?.name || 'Product')} - ${safeInt(r.rating, 0)}/5</div>
+            <div class="small">${escapeHtml(r.reviewText || '')}</div>
+            <small class="text-muted">By ${escapeHtml(r.buyer?.firstName || 'Buyer')} ${escapeHtml(r.buyer?.lastName || '')}</small>
         </div>
     `).join('');
 }
@@ -182,15 +196,19 @@ async function loadSellerOrders() {
             : '<span class="badge text-bg-warning ms-2">UNPAID</span>';
 
         const paidAt = order.paidAt ? new Date(order.paidAt).toLocaleString() : 'Not paid yet';
-        const method = order.paymentMethod || '-';
+        const method = escapeHtml(order.paymentMethod || '-');
+        const buyerName = escapeHtml(order.buyerName || 'Buyer');
+        const orderStatus = escapeHtml(order.orderStatus || 'NA');
+        const orderId = safeInt(order.orderId, 0);
+        const paidAtText = escapeHtml(paidAt);
 
         return `
             <div class="border rounded p-2 mb-2">
-                <div class="fw-semibold">Order #${order.orderId} - ${order.orderStatus} ${paidBadge}</div>
-                <div class="small">Buyer: ${order.buyerName || 'Buyer'}</div>
+                <div class="fw-semibold">Order #${orderId} - ${orderStatus} ${paidBadge}</div>
+                <div class="small">Buyer: ${buyerName}</div>
                 <div class="small">Your Amount: INR ${formatInr(order.sellerAmount)}</div>
                 <div class="small">Payment Method: ${method}</div>
-                <div class="small">Paid At: ${paidAt}</div>
+                <div class="small">Paid At: ${paidAtText}</div>
             </div>
         `;
     }).join('');

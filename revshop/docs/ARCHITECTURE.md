@@ -28,6 +28,7 @@ flowchart LR
 
 ## Security Model
 - Form login (`/login`) with session-based authentication
+- JWT authentication for API clients via `Authorization: Bearer <token>` (`POST /api/auth/login`)
 - Role-based authorization:
   - Buyer: cart/order/payment/favorites/reviews
   - Seller: inventory/order status/review visibility

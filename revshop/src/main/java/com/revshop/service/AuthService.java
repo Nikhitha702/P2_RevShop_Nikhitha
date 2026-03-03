@@ -4,12 +4,18 @@ import com.revshop.dto.ApiResponse;
 import com.revshop.dto.BuyerRegisterRequest;
 import com.revshop.dto.ForgotPasswordRequest;
 import com.revshop.dto.ForgotPasswordResponse;
+import com.revshop.dto.LoginRequest;
+import com.revshop.dto.LoginResponse;
 import com.revshop.dto.ResetPasswordRequest;
 import com.revshop.dto.SellerRegisterRequest;
 import com.revshop.entity.User;
 import com.revshop.mapper.UserMapper;
 import com.revshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +30,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetRateLimiter passwordResetRateLimiter;
+    private final PasswordResetDeliveryService passwordResetDeliveryService;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtService jwtService;
 
     @Transactional
     public ApiResponse registerBuyer(BuyerRegisterRequest request) {
@@ -61,8 +71,9 @@ public class AuthService {
         user.setResetPasswordToken(token);
         user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(30));
         userRepository.save(user);
+        passwordResetDeliveryService.sendResetInstructions(user, token);
 
-        return new ForgotPasswordResponse(true, "Reset token generated successfully", token);
+        return new ForgotPasswordResponse(true, "If your account exists, reset instructions have been sent.");
     }
 
     @Transactional
@@ -84,6 +95,34 @@ public class AuthService {
         userRepository.save(user);
 
         return new ApiResponse(true, "Password reset successful");
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, request.getPassword())
+            );
+        } catch (BadCredentialsException ex) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+        String token = jwtService.generateToken(userDetails);
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(Object::toString)
+                .orElse("ROLE_BUYER");
+
+        return new LoginResponse(
+                true,
+                "Login successful",
+                token,
+                "Bearer",
+                jwtService.getJwtExpirationSeconds(),
+                role
+        );
     }
 
 }

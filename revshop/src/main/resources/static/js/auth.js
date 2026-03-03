@@ -82,31 +82,15 @@ async function requestForgotPassword(event) {
     event.preventDefault();
     const form = document.getElementById('forgotPasswordForm');
     const msgEl = document.getElementById('forgotPasswordMessage');
-    const tokenWrapEl = document.getElementById('forgotPasswordTokenWrap');
-    const tokenEl = document.getElementById('forgotPasswordToken');
     const payload = Object.fromEntries(new FormData(form).entries());
 
     try {
         const { response, body } = await postJson('/api/auth/forgot-password', payload);
         msgEl.textContent = body.message || 'Request failed';
         msgEl.className = response.ok ? 'mt-2 small text-success' : 'mt-2 small text-danger';
-
-        if (tokenWrapEl && tokenEl) {
-            if (response.ok && body.token) {
-                tokenEl.textContent = body.token;
-                tokenWrapEl.classList.remove('d-none');
-            } else {
-                tokenEl.textContent = '';
-                tokenWrapEl.classList.add('d-none');
-            }
-        }
     } catch (err) {
         msgEl.textContent = err.message || 'Unable to reach server';
         msgEl.className = 'mt-2 small text-danger';
-        if (tokenWrapEl && tokenEl) {
-            tokenEl.textContent = '';
-            tokenWrapEl.classList.add('d-none');
-        }
     }
 }
 
