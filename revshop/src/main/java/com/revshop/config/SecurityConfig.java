@@ -30,8 +30,12 @@ public class SecurityConfig {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, customUserDetailsService);
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers("/api/auth/**")
+                        .ignoringRequestMatchers(request -> {
+                            String authHeader = request.getHeader("Authorization");
+                            return authHeader != null && authHeader.startsWith("Bearer ");
+                        })
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/home", "/login", "/forgot-password", "/reset-password", "/register/**", "/css/**", "/js/**", "/uploads/**").permitAll()

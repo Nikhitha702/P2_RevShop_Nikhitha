@@ -64,8 +64,10 @@ public class AuthService {
         String email = request.getEmail().trim().toLowerCase();
         passwordResetRateLimiter.validateOrThrow(email);
 
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new IllegalArgumentException("Email is not registered"));
+        User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
+        if (user == null) {
+            return new ForgotPasswordResponse(true, "If your account exists, reset instructions have been sent.");
+        }
 
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);

@@ -177,14 +177,17 @@ class AuthServiceTest {
     }
 
     @Test
-    void shouldFailForUnknownForgotPasswordEmail() {
+    void shouldReturnGenericResponseForUnknownForgotPasswordEmail() {
         ForgotPasswordRequest req = new ForgotPasswordRequest();
         req.setEmail("missing@b.com");
         when(userRepository.findByEmailIgnoreCase("missing@b.com")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> authService.forgotPassword(req));
+        ForgotPasswordResponse response = authService.forgotPassword(req);
+
+        assertTrue(response.isSuccess());
+        assertEquals("If your account exists, reset instructions have been sent.", response.getMessage());
         verify(passwordResetRateLimiter).validateOrThrow("missing@b.com");
-        verifyNoInteractions(passwordEncoder);
+        verifyNoInteractions(passwordEncoder, passwordResetDeliveryService);
     }
 
     @Test
