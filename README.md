@@ -15,5 +15,4 @@ App URL: `http://localhost:8080`
 
 - Project README: [`revshop/README.md`](revshop/README.md)
 - Architecture: [`revshop/docs/ARCHITECTURE.md`](revshop/docs/ARCHITECTURE.md)
-- ERD: [`revshop/docs/ERD.md`](revshop/docs/ERD.md)
 - Testing: [`revshop/docs/TESTING.md`](revshop/docs/TESTING.md)

@@ -81,6 +81,5 @@ mvn test
 - `src/test/java/com/revshop/service` - service unit tests
 
 ## Definition Of Done Artifacts
-- ERD: [docs/ERD.md](docs/ERD.md)
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Testing Artifacts: [docs/TESTING.md](docs/TESTING.md)
