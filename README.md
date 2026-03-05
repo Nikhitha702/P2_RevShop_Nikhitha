@@ -82,3 +82,6 @@ mvn test
 ## Definition Of Done Artifacts
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Testing Artifacts: [docs/TESTING.md](docs/TESTING.md)
+- Full Docs Bundle: [docs/README.md](docs/README.md)
+
+
